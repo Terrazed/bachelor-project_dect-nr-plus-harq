@@ -15,6 +15,12 @@ int dect_mac_phy_handler_start_modem(){
         return ret;
     }
 
+    ret = nrf_modem_dect_phy_callback_set(dect_mac_phy_handler_get_callbacks());
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_callback_set() returned %d", ret);
+        return ret;
+    }
+
     dect_mac_phy_handler_capability_get();
 
     dect_mac_phy_handler_init();
