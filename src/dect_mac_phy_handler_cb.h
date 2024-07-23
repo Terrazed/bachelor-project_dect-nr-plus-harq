@@ -1,7 +1,9 @@
 #ifndef DECT_MAC_PHY_HANDLER_CB_H
 #define DECT_MAC_PHY_HANDLER_CB_H
 
+#include <zephyr/kernel.h>
 #include <nrf_modem_dect_phy.h>
+
 
 /* struct that represents the capabilities of the modem. */
 struct dect_capabilities {
@@ -18,8 +20,11 @@ struct dect_capabilities {
     uint8_t beta;
 };
 
-/* variable that holds the capability of the modem (gets updated when "dect_mac_phy_capability_get_cb" is called) */
+/* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
 extern struct dect_capabilities capabilities;
+
+/* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
+extern struct k_sem phy_access_sem;
 
 
 /* Callback after init operation. */

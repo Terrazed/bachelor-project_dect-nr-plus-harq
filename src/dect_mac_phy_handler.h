@@ -6,9 +6,11 @@
 
 #include "dect_mac_phy_handler_cb.h"
 
-/* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb) */
+/* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
 extern struct dect_capabilities capabilities;
 
+/* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
+extern struct k_sem phy_access_sem;
 
 /* functions to start and stop the modem, the modem should be started when using the other commands */
 int dect_mac_phy_handler_start_modem();

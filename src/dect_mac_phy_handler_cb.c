@@ -87,6 +87,7 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
 
     if(err){
         LOG_ERR("capability get callback - error: %d", err);
+        k_sem_give(&phy_access_sem);
         return;
     }
 
@@ -102,6 +103,9 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
     capabilities.harq_feedback_delay = capability->variant[0].harq_feedback_delay;
     capabilities.mu = capability->variant[0].mu;
     capabilities.beta = capability->variant[0].beta;
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
 }
 
 
