@@ -6,8 +6,19 @@
 
 #include "dect_mac_phy_handler_cb.h"
 
-/* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
-extern struct dect_capabilities capabilities;
+enum dect_mac_phy_function {
+    CAPABILITY_GET = 1,
+    INIT = 2,
+    DEINIT = 3,
+    RX = 4,
+    TX = 5,
+    TX_HARQ = 6,
+    TX_RX = 7,
+    RSSI = 8,
+    RX_STOP = 9,
+    LINK_CONFIG = 10,
+    TIME_GET = 11,
+};
 
 /* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
 extern struct k_sem phy_access_sem;
@@ -20,7 +31,7 @@ int dect_mac_phy_handler_stop_modem();
 void dect_mac_phy_handler_capability_get();
 void dect_mac_phy_handler_init();
 void dect_mac_phy_handler_deinit();
-void dect_mac_phy_handler_rx();
+void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params);
 void dect_mac_phy_handler_tx();
 void dect_mac_phy_handler_tx_harq();
 void dect_mac_phy_handler_tx_rx();
@@ -30,6 +41,11 @@ void dect_mac_phy_handler_link_config();
 void dect_mac_phy_handler_time_get();
 
 
+/* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
+extern struct dect_capabilities capabilities;
+
+/* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
+extern struct k_sem phy_access_sem;
 
 
 

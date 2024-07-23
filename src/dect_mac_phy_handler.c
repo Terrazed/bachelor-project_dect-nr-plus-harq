@@ -97,9 +97,34 @@ void dect_mac_phy_handler_deinit(){
 }
 
 
-void dect_mac_phy_handler_rx(){
+void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params){
 
-    
+    /* create true params */
+    const struct nrf_modem_dect_phy_rx_params true_params = {
+        .start_time = params.start_time,
+        .handle = ((RX << 28) | (params.handle & 0x0fffffff)),
+        .network_id = CONFIG_NETWORK_ID,
+        .mode = params.rx_mode,
+        .rssi_interval = NRF_MODEM_DECT_PHY_RSSI_INTERVAL_OFF,
+        .link_id = NRF_MODEM_DECT_PHY_LINK_UNSPECIFIED,
+        .rssi_level = CONFIG_RSSI_TARGET,
+        .carrier = CONFIG_CARRIER,
+        .duration = params.rx_period_ms,
+        .filter = {
+            .short_network_id = CONFIG_NETWORK_ID,
+            .is_short_network_id_used = true,
+            .receiver_identity = params.receiver_identity,
+        }
+    };
+
+    /* take the semaphore */
+    k_sem_take(&phy_access_sem, K_FOREVER);
+
+    /* start the reception */
+    int ret = nrf_modem_dect_phy_rx(&true_params);
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_rx() returned %d", ret);
+    }
 }
 
 
