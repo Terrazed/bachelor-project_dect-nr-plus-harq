@@ -63,6 +63,8 @@ void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_de
 
 void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_status *status, const void *data, uint32_t len){
     LOG_DBG("pdc callback - time: %llu", *time);
+
+    LOG_INF("Received data: %s", data);
 }
 
 

@@ -86,7 +86,7 @@ struct dect_mac_phy_handler_rx_params {
     uint64_t start_time;
 };
 
-struct dect_phy_handler_tx_params {
+struct dect_mac_phy_handler_tx_params {
     uint32_t handle : 28; 
     enum dect_phy_handler_tx_usage {
         NO_HARQ,
@@ -148,6 +148,15 @@ enum nrf_mac_header_type{
 enum nrf_mac_header_format{
 	HEADER_FORMAT_000 = 0,
 	HEADER_FORMAT_001 = 1,
+};
+
+enum nrf_mac_feedback_format{
+	NO_FEEDBACK = 0,
+	FEEDBACK_FORMAT_1 = 1,
+	FEEDBACK_FORMAT_2 = 2,
+	FEEDBACK_FORMAT_3 = 3,
+	FEEDBACK_FORMAT_4 = 4,
+	FEEDBACK_FORMAT_5 = 5,
 };
 
 #endif // DEC_MAC_PHY_HANDLER_TYPES_H

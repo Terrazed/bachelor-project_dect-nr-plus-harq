@@ -115,7 +115,7 @@ void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params){
         .link_id = NRF_MODEM_DECT_PHY_LINK_UNSPECIFIED,
         .rssi_level = CONFIG_RSSI_TARGET,
         .carrier = CONFIG_CARRIER,
-        .duration = params.rx_period_ms,
+        .duration = params.rx_period_ms * 69120,
         .filter = {
             .short_network_id = CONFIG_NETWORK_ID,
             .is_short_network_id_used = true,
@@ -134,11 +134,14 @@ void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params){
 }
 
 
-void dect_mac_phy_handler_tx(struct dect_phy_handler_tx_params params){
+void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params){
 
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_PARAM_CREATE(true_params, params);
     
+    /* take the semaphore */
+    k_sem_take(&phy_access_sem, K_FOREVER);
+
     /* start the transmission */
     int ret = nrf_modem_dect_phy_tx(&true_params);
     if(ret){
@@ -183,7 +186,7 @@ void dect_mac_phy_handler_time_get(){
     
 }
 
-void dect_mac_phy_handler_tx_config(struct dect_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params){
+void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params){
 
     /* set the time */
     output_params->start_time = input_params->start_time;
@@ -205,7 +208,7 @@ void dect_mac_phy_handler_tx_config(struct dect_phy_handler_tx_params *input_par
     uint32_t df_mcs = 2;
 
     uint32_t packet_length_type = 0; //TODO: create a function to calculate these
-    uint32_t packet_length = 0;
+    uint32_t packet_length = 2;
 
     if(input_params->tx_usage == BEACON){
         output_params->phy_type = HEADER_TYPE_1;
