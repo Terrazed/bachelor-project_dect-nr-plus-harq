@@ -35,7 +35,19 @@ int dect_mac_phy_handler_start_modem(){
 
 int dect_mac_phy_handler_stop_modem(){
 
-    
+    int ret;
+
+    /* deinitialize the dect phy modem */
+    dect_mac_phy_handler_deinit();
+
+    /* deinitialize the modem lib */
+    ret = nrf_modem_lib_shutdown();
+    if(ret){
+        LOG_ERR("nrf_modem_lib_shutdown() returned %d", ret);
+        return ret;
+    }
+
+    return 0; // Success
 }
 
 
@@ -68,8 +80,13 @@ void dect_mac_phy_handler_init(){
 
 
 void dect_mac_phy_handler_deinit(){
-
     
+    k_sem_take(&phy_access_sem, K_FOREVER);
+
+    int ret = nrf_modem_dect_phy_deinit();
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_deinit() returned %d", ret);
+    }
 }
 
 
