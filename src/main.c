@@ -22,6 +22,13 @@ int main(void)
 
         LOG_DBG("Modem started");
 
+        err = dect_mac_phy_handler_stop_modem();
+        if(err){
+            LOG_ERR("Failed to stop modem");
+            return err;
+        }
+        LOG_DBG("Modem stopped");
+
         
 
         return 0;
