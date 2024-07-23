@@ -91,7 +91,12 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
 
 void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err){
 
-    static volatile struct nrf_modem_dect_phy_callbacks dect_phy_callbacks;
+    
+}
+
+
+struct nrf_modem_dect_phy_callbacks* dect_mac_phy_handler_get_callbacks(void){
+    static struct nrf_modem_dect_phy_callbacks dect_phy_callbacks;
 
 	dect_phy_callbacks.init = dect_mac_phy_init_cb;
 	dect_phy_callbacks.deinit = dect_mac_phy_deinit_cb;
@@ -106,13 +111,5 @@ void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err er
 	dect_phy_callbacks.time_get = dect_mac_phy_time_get_cb;
 	dect_phy_callbacks.capability_get = dect_mac_phy_capability_get_cb;
     
-	return dect_phy_callbacks;
-}
-
-
-
-
-
-struct nrf_modem_dect_phy_callbacks dect_phy_handler_get_callbacks(void){
-
+	return &dect_phy_callbacks;
 }
