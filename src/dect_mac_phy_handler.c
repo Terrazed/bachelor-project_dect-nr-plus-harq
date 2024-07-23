@@ -7,30 +7,29 @@ K_SEM_DEFINE(phy_access_sem, 1, 1);
 
 int dect_mac_phy_handler_start_modem(){
 
-    int ret;
+    int ret; // Return value
 
+    /* initialize the modem lib */
     ret = nrf_modem_lib_init();
     if(ret){
         LOG_ERR("nrf_modem_lib_init() returned %d", ret);
         return ret;
     }
 
+    /* set the callbacks for the dect phy modem */
     ret = nrf_modem_dect_phy_callback_set(dect_mac_phy_handler_get_callbacks());
     if(ret){
         LOG_ERR("nrf_modem_dect_phy_callback_set() returned %d", ret);
         return ret;
     }
 
+    /* get the capability of the api */
     dect_mac_phy_handler_capability_get();
 
+    /* initialize the dect phy modem */
     dect_mac_phy_handler_init();
 
-    
-
-
-
-
-    
+    return 0; // Success
 }
 
 
