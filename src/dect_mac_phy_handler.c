@@ -53,8 +53,10 @@ int dect_mac_phy_handler_stop_modem(){
 
 void dect_mac_phy_handler_capability_get(){
 
+    /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
 
+    /* get the capability of the dect phy modem */
     int ret = nrf_modem_dect_phy_capability_get();
     if(ret){
         LOG_ERR("nrf_modem_dect_phy_capability_get() returned %d", ret);
@@ -65,13 +67,16 @@ void dect_mac_phy_handler_capability_get(){
 
 void dect_mac_phy_handler_init(){
 
+    /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
     
+    /* create init parameters */
     const struct nrf_modem_dect_phy_init_params params = {
         .harq_rx_expiry_time_us = CONFIG_HARQ_RX_EXPIRY_TIME_US,
         .harq_rx_process_count = capabilities.harq_process_count_max,
     };
 
+    /* initialize the dect phy modem */
     int ret = nrf_modem_dect_phy_init(&params);
     if(ret){
         LOG_ERR("nrf_modem_dect_phy_init() returned %d", ret);
@@ -80,9 +85,11 @@ void dect_mac_phy_handler_init(){
 
 
 void dect_mac_phy_handler_deinit(){
-    
+
+    /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
 
+    /* deinitialize the dect phy modem */
     int ret = nrf_modem_dect_phy_deinit();
     if(ret){
         LOG_ERR("nrf_modem_dect_phy_deinit() returned %d", ret);
