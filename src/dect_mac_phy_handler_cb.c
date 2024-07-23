@@ -14,6 +14,9 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
         LOG_ERR("init callback - error: %d", err);
         return;
     }
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
 }
 
 
@@ -24,11 +27,17 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
         LOG_ERR("op complete callback - error: %d", err);
         return;
     }
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
 }
 
 
 void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rssi_meas *meas){
     LOG_DBG("rssi callback - time: %llu", *time);
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
 }
 
 
@@ -69,6 +78,9 @@ void dect_mac_phy_link_config_cb(const uint64_t *time, enum nrf_modem_dect_phy_e
         LOG_ERR("link config callback - error: %d", err);
         return;
     }
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
 }
 
 
@@ -79,6 +91,9 @@ void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err 
         LOG_ERR("time get callback - error: %d", err);
         return;
     }
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
 }
 
 
@@ -110,7 +125,15 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
 
 
 void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err){
+    LOG_DBG("deinit callback - time: %llu, err: %d", *time, err);
 
+    if(err){
+        LOG_ERR("deinit callback - error: %d", err);
+        return;
+    }
+
+    /* release the semaphore */
+    k_sem_give(&phy_access_sem);
     
 }
 
