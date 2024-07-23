@@ -4,6 +4,12 @@
 #include <zephyr/kernel.h>
 #include <nrf_modem_dect_phy.h>
 
+#include "dect_mac_phy_handler_cb.h"
+
+/* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb) */
+extern struct dect_capabilities capabilities;
+
+
 /* functions to start and stop the modem, the modem should be started when using the other commands */
 int dect_mac_phy_handler_start_modem();
 int dect_mac_phy_handler_stop_modem();

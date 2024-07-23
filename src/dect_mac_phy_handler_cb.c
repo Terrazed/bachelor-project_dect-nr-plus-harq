@@ -3,6 +3,9 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(handler_cb);
 
+/* initialize globals variables */
+struct dect_capabilities capabilities = {0};
+
 
 void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_modem_cfg *cfg){
     LOG_DBG("init callback - time: %llu, temp: %d, err: %d", *time, temp, err);
@@ -86,6 +89,19 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
         LOG_ERR("capability get callback - error: %d", err);
         return;
     }
+
+    /* save the capabilities of the modem */
+    capabilities.dect_version = capability->dect_version;
+    capabilities.power_class = capability->variant[0].power_class;
+    capabilities.rx_spatial_streams = capability->variant[0].rx_spatial_streams;
+    capabilities.rx_tx_diversity = capability->variant[0].rx_tx_diversity;
+    capabilities.rx_gain = capability->variant[0].rx_gain;
+    capabilities.mcs_max = capability->variant[0].mcs_max;
+    capabilities.harq_soft_buf_size = capability->variant[0].harq_soft_buf_size;
+    capabilities.harq_process_count_max = capability->variant[0].harq_process_count_max;
+    capabilities.harq_feedback_delay = capability->variant[0].harq_feedback_delay;
+    capabilities.mu = capability->variant[0].mu;
+    capabilities.beta = capability->variant[0].beta;
 }
 
 

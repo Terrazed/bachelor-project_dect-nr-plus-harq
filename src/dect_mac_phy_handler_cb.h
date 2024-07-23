@@ -3,6 +3,24 @@
 
 #include <nrf_modem_dect_phy.h>
 
+/* struct that represents the capabilities of the modem. */
+struct dect_capabilities {
+    uint8_t dect_version;
+    uint8_t power_class;
+    uint8_t rx_spatial_streams;
+    uint8_t rx_tx_diversity;
+    int8_t rx_gain;
+    uint8_t mcs_max;
+    uint32_t harq_soft_buf_size;
+    uint8_t harq_process_count_max;
+    uint8_t harq_feedback_delay;
+    uint8_t mu;
+    uint8_t beta;
+};
+
+/* variable that holds the capability of the modem (gets updated when "dect_mac_phy_capability_get_cb" is called) */
+extern struct dect_capabilities capabilities;
+
 
 /* Callback after init operation. */
 void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_modem_cfg *cfg);
