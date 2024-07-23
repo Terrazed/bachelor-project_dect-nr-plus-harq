@@ -43,7 +43,7 @@ void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err er
 
 
 /* getter for dect_phy_callbacks */
-struct nrf_modem_dect_phy_callbacks dect_phy_handler_get_callbacks(void);
+struct nrf_modem_dect_phy_callbacks* dect_mac_phy_handler_get_callbacks(void);
 
 
 #endif // DECT_MAC_PHY_HANDLER_CB_H
