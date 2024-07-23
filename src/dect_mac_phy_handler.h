@@ -23,6 +23,14 @@ enum dect_mac_phy_function {
 /* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
 extern struct k_sem phy_access_sem;
 
+struct dect_mac_phy_handler_rx_params {
+    uint32_t handle : 28;
+    enum nrf_modem_dect_phy_rx_mode rx_mode;
+    uint32_t rx_period_ms;
+    uint16_t receiver_identity;
+    uint64_t start_time;
+};
+
 /* functions to start and stop the modem, the modem should be started when using the other commands */
 int dect_mac_phy_handler_start_modem();
 int dect_mac_phy_handler_stop_modem();
