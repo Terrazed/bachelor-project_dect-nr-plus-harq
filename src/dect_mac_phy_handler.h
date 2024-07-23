@@ -20,8 +20,6 @@ enum dect_mac_phy_function {
     TIME_GET = 11,
 };
 
-/* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
-extern struct k_sem phy_access_sem;
 
 struct dect_mac_phy_handler_rx_params {
     uint32_t handle : 28;
