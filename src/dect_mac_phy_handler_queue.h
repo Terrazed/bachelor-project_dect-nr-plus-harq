@@ -16,7 +16,7 @@
 struct dect_phy_handler_queue_item {
     sys_snode_t node;
     enum dect_mac_phy_function function;
-    union dect_mac_phy_handler_params param;
+    union dect_mac_phy_handler_params params;
     uint32_t priority;
 };
 

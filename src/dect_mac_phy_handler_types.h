@@ -98,6 +98,21 @@ struct harq_tx_params
 	uint32_t buffer_size; // buffer size in bytes
 };
 
+/* enumerate the different usage of the tx function */
+enum dect_phy_handler_tx_usage
+{
+	NO_HARQ,
+	HARQ,
+	BEACON,
+};
+
+/* structure for the feedback in the tx function */
+struct feedback
+{
+	uint32_t format;
+	union feedback_info info;
+};
+
 /* structure for the parameters inside phy handler functions */
 struct dect_mac_phy_handler_rx_params
 {
@@ -106,19 +121,6 @@ struct dect_mac_phy_handler_rx_params
 	uint32_t rx_period_ms;
 	uint16_t receiver_identity;
 	uint64_t start_time;
-};
-
-enum dect_phy_handler_tx_usage
-{
-	NO_HARQ,
-	HARQ,
-	BEACON,
-};
-
-struct feedback
-{
-	uint32_t format;
-	union feedback_info info;
 };
 
 struct dect_mac_phy_handler_tx_params
@@ -171,6 +173,16 @@ struct dect_mac_phy_handler_rssi_params
 struct dect_mac_phy_handler_rx_stop_params
 {
 	uint32_t handle : 28;
+};
+
+union dect_mac_phy_handler_params
+{
+	struct dect_mac_phy_handler_rx_params rx_params;
+	struct dect_mac_phy_handler_tx_params tx_params;
+	struct dect_mac_phy_handler_tx_harq_params tx_harq_params;
+	struct dect_mac_phy_handler_tx_rx_params tx_rx_params;
+	struct dect_mac_phy_handler_rssi_params rssi_params;
+	struct dect_mac_phy_handler_rx_stop_params rx_stop_params;
 };
 
 /* Header type 1, due to endianness the order is different than in the specification. */

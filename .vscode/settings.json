@@ -4,6 +4,7 @@
         "nrf_modem_dect_phy.h": "c",
         "kernel.h": "c",
         "typeinfo": "c",
-        "dect_mac_phy_handler.h": "c"
+        "dect_mac_phy_handler.h": "c",
+        "dect_mac_phy_handler_types.h": "c"
     }
 }
