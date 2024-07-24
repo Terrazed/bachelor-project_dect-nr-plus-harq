@@ -28,8 +28,15 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
         return;
     }
 
-    /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    /* dont release the semaphore when switching from tx to rx in a combined operation */
+    if((current_state == TRANSMITTING) && ((handle | 0xF0000000) == TX_RX)){
+        // switch from tx to rx
+        current_state = RECEIVING;
+    }
+    else{
+        /* release the semaphore */
+        k_sem_give(&phy_access_sem);
+    }    
 }
 
 
@@ -53,6 +60,7 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
 
 void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr){
     LOG_DBG("pcc callback - time: %llu", *time);
+)
 }
 
 

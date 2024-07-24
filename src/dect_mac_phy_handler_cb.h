@@ -13,6 +13,9 @@ extern struct dect_capabilities capabilities;
 /* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
 extern struct k_sem phy_access_sem;
 
+/* variable that represent the current state of the modem (declared in dect_mac_phy_handler.c) */
+extern enum dect_mac_phy_state current_state;
+
 
 /* Callback after init operation. */
 void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_modem_cfg *cfg);

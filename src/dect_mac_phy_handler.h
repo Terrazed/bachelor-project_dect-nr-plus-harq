@@ -39,8 +39,11 @@ extern struct dect_capabilities capabilities;
 /* variable that holds the device id of the device (declared in dect_mac_phy_handler.c) */
 extern uint16_t device_id;
 
-/* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c)*/
+/* semaphore to protect the access to the phy layer api (declared in dect_mac_phy_handler.c) */
 extern struct k_sem phy_access_sem;
+
+/* variable that represent the current state of the modem (declared in dect_mac_phy_handler.c) */
+extern enum dect_mac_phy_state current_state;
 
 
 
