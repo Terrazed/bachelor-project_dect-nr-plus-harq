@@ -345,6 +345,14 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     uint32_t packet_length_type = 0; // TODO: create a function to calculate these
     uint32_t packet_length = 2;
 
+    /* handle the case of sending a message with no data */
+    if(input_params->data_size == 0)
+    {
+        packet_length_type = 0;
+        packet_length = 0;
+        df_mcs = 0;
+    }
+
     if (input_params->tx_usage == BEACON)
     {
         output_params->phy_type = HEADER_TYPE_1;

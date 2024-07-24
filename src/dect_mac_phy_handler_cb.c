@@ -65,6 +65,32 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
 void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr)
 {
     LOG_DBG("pcc callback - time: %llu", *time);
+
+    if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
+    {
+        /* send a harq feedback */
+        struct dect_mac_phy_handler_tx_harq_params harq = {
+            .handle = 10,
+            .lbt_enable = false,
+            .data = NULL,
+            .data_size = 0,
+            .receiver_id = 0,
+            .harq = {
+                .redundancy_version = 0,
+                .new_data_indication = 0,
+                .harq_process_nr = 0,
+                .buffer_size = 0,
+            },
+            .start_time = status->stf_start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
+        };
+        dect_mac_phy_handler_tx_harq(harq);
+
+        
+    }
+
+    
+    
+
 }
 
 void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_crc_failure *crc_failure)
