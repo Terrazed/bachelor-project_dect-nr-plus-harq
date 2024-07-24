@@ -3,6 +3,7 @@
     "files.associations": {
         "nrf_modem_dect_phy.h": "c",
         "kernel.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "dect_mac_phy_handler.h": "c"
     }
 }

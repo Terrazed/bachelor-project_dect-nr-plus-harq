@@ -8,8 +8,6 @@
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler_cb.h"
 
-
-
 /* functions to start and stop the modem, the modem should be started when using the other commands */
 int dect_mac_phy_handler_start_modem();
 int dect_mac_phy_handler_stop_modem();
@@ -27,11 +25,19 @@ void dect_mac_phy_handler_rx_stop(struct dect_mac_phy_handler_rx_stop_params par
 void dect_mac_phy_handler_link_config();
 void dect_mac_phy_handler_time_get();
 
-#define DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(name, phy_handler_param) struct nrf_modem_dect_phy_tx_params name;union nrf_modem_dect_phy_hdr header;name.phy_header = &header;dect_mac_phy_handler_tx_config(&phy_handler_param, &name);
-void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params);
-#define DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(name, phy_handler_param) struct nrf_modem_dect_phy_rx_params name;dect_mac_phy_handler_rx_config(&phy_handler_param, &name);
-void dect_mac_phy_handler_rx_config(struct dect_mac_phy_handler_rx_params *input_params, struct nrf_modem_dect_phy_rx_params *output_params);
+#define DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(name, phy_handler_param) \
+    struct nrf_modem_dect_phy_tx_params name;                              \
+    union nrf_modem_dect_phy_hdr header;                                   \
+    name.phy_header = &header;                                             \
+    dect_mac_phy_handler_tx_config(&phy_handler_param, &name);
 
+void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params);
+
+#define DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(name, phy_handler_param) \
+    struct nrf_modem_dect_phy_rx_params name;                              \
+    dect_mac_phy_handler_rx_config(&phy_handler_param, &name);
+
+void dect_mac_phy_handler_rx_config(struct dect_mac_phy_handler_rx_params *input_params, struct nrf_modem_dect_phy_rx_params *output_params);
 
 /* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
 extern struct dect_capabilities capabilities;
@@ -44,7 +50,5 @@ extern struct k_sem phy_access_sem;
 
 /* variable that represent the current state of the modem (declared in dect_mac_phy_handler.c) */
 extern enum dect_mac_phy_state current_state;
-
-
 
 #endif // DECT_MAC_PHY_HANDLER_H
