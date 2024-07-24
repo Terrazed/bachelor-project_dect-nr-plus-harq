@@ -266,6 +266,14 @@ void dect_mac_phy_handler_link_config(){
 
 void dect_mac_phy_handler_time_get(){
 
+    /* take the semaphore */
+    k_sem_take(&phy_access_sem, K_FOREVER);
+
+    /* start the time get */
+    int ret = nrf_modem_dect_phy_time_get();
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_time_get() returned %d", ret);
+    }
     
 }
 
