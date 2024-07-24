@@ -106,22 +106,7 @@ void dect_mac_phy_handler_deinit(){
 void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params){
 
     /* create true params */
-    const struct nrf_modem_dect_phy_rx_params true_params = {
-        .start_time = params.start_time,
-        .handle = ((RX << 28) | (params.handle & 0x0fffffff)),
-        .network_id = CONFIG_NETWORK_ID,
-        .mode = params.rx_mode,
-        .rssi_interval = NRF_MODEM_DECT_PHY_RSSI_INTERVAL_OFF,
-        .link_id = NRF_MODEM_DECT_PHY_LINK_UNSPECIFIED,
-        .rssi_level = CONFIG_RSSI_TARGET,
-        .carrier = CONFIG_CARRIER,
-        .duration = params.rx_period_ms * 69120,
-        .filter = {
-            .short_network_id = CONFIG_NETWORK_ID,
-            .is_short_network_id_used = true,
-            .receiver_identity = params.receiver_identity,
-        }
-    };
+    DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(true_params, params);
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
@@ -137,7 +122,7 @@ void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params){
 void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params){
 
     /* create true params */
-    DECT_MAC_PHY_HANDLER_TRUE_PARAM_CREATE(true_params, params);
+    DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_params, params);
     
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
@@ -151,7 +136,7 @@ void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params){
 }
 
 
-void dect_mac_phy_handler_tx_harq(struct dect_phy_handler_tx_harq_params params){
+void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params params){
 
     /* convert to normal tx params */
     struct dect_mac_phy_handler_tx_params tx_params = {
@@ -183,7 +168,7 @@ void dect_mac_phy_handler_tx_harq(struct dect_phy_handler_tx_harq_params params)
     
 
     /* create true params */
-    DECT_MAC_PHY_HANDLER_TRUE_PARAM_CREATE(true_params, tx_params);
+    DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_params, tx_params);
     
     /* take the semaphore */
     //k_sem_take(&phy_access_sem, K_FOREVER);
@@ -197,9 +182,47 @@ void dect_mac_phy_handler_tx_harq(struct dect_phy_handler_tx_harq_params params)
 }
 
 
-void dect_mac_phy_handler_tx_rx(){
+void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params){
 
+    /* convert to normal tx params */
+    struct dect_mac_phy_handler_tx_params tx_params = {
+        .handle = params.handle,
+        .tx_usage = params.tx_usage,
+        .lbt_enable = params.lbt_enable,
+        .data = params.data,
+        .data_size = params.data_size,
+        .receiver_id = params.receiver_id,
+        .feedback = params.feedback,
+        .harq = params.harq,
+        .start_time = params.start_time,
+    };
     
+    /* convert to normal rx params */
+    struct dect_mac_phy_handler_rx_params rx_params = {
+        .handle = params.handle,
+        .rx_mode = params.rx_mode,
+        .rx_period_ms = params.rx_period_ms,
+        .receiver_identity = params.receiver_id,
+        .start_time = 0,
+    };
+
+    /* create true params */
+    DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_tx_params, tx_params);
+    DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(true_rx_params, rx_params);
+
+    struct nrf_modem_dect_phy_tx_rx_params true_params = {
+        .tx = &true_tx_params,
+        .rx = &true_rx_params,
+    };
+
+    /* take the semaphore */
+    k_sem_take(&phy_access_sem, K_FOREVER);
+
+    /* start the transmission */
+    int ret = nrf_modem_dect_phy_tx_rx(&true_params);
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_tx_rx() returned %d", ret);
+    }
 }
 
 
@@ -298,5 +321,24 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     output_params->bs_cqi = NRF_MODEM_DECT_PHY_BS_CQI_NOT_USED; //TODO: implement cqi and buffer
     output_params->data = input_params->data;
     output_params->data_size = input_params->data_size;
+
+}
+
+void dect_mac_phy_handler_rx_config(struct dect_mac_phy_handler_rx_params *input_params, struct nrf_modem_dect_phy_rx_params *output_params){
+    
+    /* create true params */
+        output_params->start_time = input_params->start_time;
+        output_params->handle = ((RX << 28) | (input_params->handle & 0x0fffffff));
+        output_params->network_id = CONFIG_NETWORK_ID;
+        output_params->mode = input_params->rx_mode;
+        output_params->rssi_interval = NRF_MODEM_DECT_PHY_RSSI_INTERVAL_OFF;
+        output_params->link_id = NRF_MODEM_DECT_PHY_LINK_UNSPECIFIED;
+        output_params->rssi_level = CONFIG_RSSI_TARGET;
+        output_params->carrier = CONFIG_CARRIER;
+        output_params->duration = input_params->rx_period_ms * 69120;
+        output_params->filter.short_network_id = CONFIG_NETWORK_ID;
+        output_params->filter.is_short_network_id_used = true;
+        output_params->filter.receiver_identity = input_params->receiver_identity;
+
 
 }
