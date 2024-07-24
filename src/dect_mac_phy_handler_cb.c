@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb);
+LOG_MODULE_REGISTER(handler_cb,4);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -22,7 +22,7 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
 
 void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
 {
-    LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %d", *time, temperature, err, handle);
+    LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
 
     if (err)
     {
@@ -53,7 +53,7 @@ void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_
 
 void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, uint32_t handle)
 {
-    LOG_DBG("rx stop callback - time: %llu, err: %d, handle: %d", *time, err, handle);
+    LOG_DBG("rx stop callback - time: %llu, err: %d, handle: %x", *time, err, handle);
 
     if (err)
     {
