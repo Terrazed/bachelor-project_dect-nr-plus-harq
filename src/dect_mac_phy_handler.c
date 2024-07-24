@@ -239,8 +239,8 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
     true_rx_params.handle = ((TX_RX << 28) | (params.handle & 0x0fffffff));
 
     struct nrf_modem_dect_phy_tx_rx_params true_params = {
-        .tx = &true_tx_params,
-        .rx = &true_rx_params,
+        .tx = true_tx_params,
+        .rx = true_rx_params,
     };
 
     /* take the semaphore */
