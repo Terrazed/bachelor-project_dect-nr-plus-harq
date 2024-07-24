@@ -34,6 +34,21 @@ enum dect_mac_phy_state {
     GETTING_TIME = 7,
 };
 
+/* struct that represents the capabilities of the modem. */
+struct dect_capabilities {
+    uint8_t dect_version;
+    uint8_t power_class;
+    uint8_t rx_spatial_streams;
+    uint8_t rx_tx_diversity;
+    int8_t rx_gain;
+    uint8_t mcs_max;
+    uint32_t harq_soft_buf_size;
+    uint8_t harq_process_count_max;
+    uint8_t harq_feedback_delay;
+    uint8_t mu;
+    uint8_t beta;
+};
+
 /* feedback info as in table 6.2.2-2 of DECT-SPEC "DECT-2020 NR Part 4", due to endianness the order is different than in the specification. */
 union feedback_info{
 	struct mac_feedback_info_format_1{

@@ -4,21 +4,8 @@
 #include <zephyr/kernel.h>
 #include <nrf_modem_dect_phy.h>
 
+#include "dect_mac_phy_handler_types.h"
 
-/* struct that represents the capabilities of the modem. */
-struct dect_capabilities {
-    uint8_t dect_version;
-    uint8_t power_class;
-    uint8_t rx_spatial_streams;
-    uint8_t rx_tx_diversity;
-    int8_t rx_gain;
-    uint8_t mcs_max;
-    uint32_t harq_soft_buf_size;
-    uint8_t harq_process_count_max;
-    uint8_t harq_feedback_delay;
-    uint8_t mu;
-    uint8_t beta;
-};
 
 /* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
 extern struct dect_capabilities capabilities;
