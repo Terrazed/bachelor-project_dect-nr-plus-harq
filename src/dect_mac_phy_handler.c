@@ -63,6 +63,9 @@ void dect_mac_phy_handler_capability_get(){
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
 
+    /* indicating current state */
+    current_state = GETTING_CAPABILITY;
+
     /* get the capability of the dect phy modem */
     int ret = nrf_modem_dect_phy_capability_get();
     if(ret){
@@ -76,7 +79,10 @@ void dect_mac_phy_handler_init(){
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
-    
+
+    /* indicating current state */
+    current_state = INITIALIZING;
+
     /* create init parameters */
     const struct nrf_modem_dect_phy_init_params params = {
         .harq_rx_expiry_time_us = CONFIG_HARQ_RX_EXPIRY_TIME_US,
@@ -95,6 +101,9 @@ void dect_mac_phy_handler_deinit(){
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    current_state = DEINITIALIZING;
 
     /* deinitialize the dect phy modem */
     int ret = nrf_modem_dect_phy_deinit();
@@ -111,6 +120,9 @@ void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params){
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    current_state = RECEIVING;
 
     /* start the reception */
     int ret = nrf_modem_dect_phy_rx(&true_params);
@@ -127,6 +139,9 @@ void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params){
     
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    current_state = TRANSMITTING;
 
     /* start the transmission */
     int ret = nrf_modem_dect_phy_tx(&true_params);
@@ -173,6 +188,10 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
     
     /* take the semaphore */
     //k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    //current_state = GETTING_CAPABILITY
+    //TODO: see what to do here ^
 
     /* start the transmission */
     int ret = nrf_modem_dect_phy_tx_harq(&true_params);
@@ -222,6 +241,9 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    current_state = TRANSMITTING;
 
     /* start the transmission */
     int ret = nrf_modem_dect_phy_tx_rx(&true_params);
@@ -244,6 +266,9 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params){
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    current_state = MEASURING_RSSI;
 
     /* start the rssi */
     int ret = nrf_modem_dect_phy_rssi(&true_params);
@@ -254,6 +279,9 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params){
 
 
 void dect_mac_phy_handler_rx_stop(struct dect_mac_phy_handler_rx_stop_params params){
+
+    /* indicating current state */
+    current_state = STOPPING_RECEPTION;
 
     /* start the rx stop */
     int ret = nrf_modem_dect_phy_rx_stop(params.handle);
@@ -273,6 +301,9 @@ void dect_mac_phy_handler_time_get(){
 
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
+    
+    /* indicating current state */
+    current_state = GETTING_TIME;
 
     /* start the time get */
     int ret = nrf_modem_dect_phy_time_get();
