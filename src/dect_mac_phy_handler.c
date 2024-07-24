@@ -226,9 +226,25 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
 }
 
 
-void dect_mac_phy_handler_rssi(){
+void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params){
 
-    
+    /* create true params */
+    struct nrf_modem_dect_phy_rssi_params true_params = {
+        .start_time = params.start_time,
+        .handle = params.handle,
+        .carrier = CONFIG_CARRIER,
+        .duration = params.duration,
+        .reporting_interval = params.reporting_interval,
+    };
+
+    /* take the semaphore */
+    k_sem_take(&phy_access_sem, K_FOREVER);
+
+    /* start the transmission */
+    int ret = nrf_modem_dect_phy_rssi(&true_params);
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_rssi() returned %d", ret);
+    }
 }
 
 
