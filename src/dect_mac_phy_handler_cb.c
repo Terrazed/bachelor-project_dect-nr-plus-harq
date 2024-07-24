@@ -85,7 +85,16 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
         };
         dect_mac_phy_handler_tx_harq(harq);
 
-        
+
+    }
+
+    if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
+    {
+        /* print acknowlegement */
+        union feedback_info feedback;
+        feedback.byte.hi = ((struct phy_ctrl_field_common_type2*)hdr->type_2)->feedback_info_hi;
+        feedback.byte.lo = ((struct phy_ctrl_field_common_type2*)hdr->type_2)->feedback_info_lo;
+        LOG_INF("ACK/NACK: %d", feedback.format_1.transmission_feedback);
     }
 
     
@@ -102,7 +111,15 @@ void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 {
     LOG_DBG("pdc callback - time: %llu", *time);
 
-    LOG_INF("Received data: %s", data);
+    if(len > 0)
+    {
+        LOG_INF("Received data: %s", data);
+    }
+    else
+    {
+        LOG_INF("Received data: NULL");
+    }
+    
 }
 
 void dect_mac_phy_pdc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_crc_failure *crc_failure)
