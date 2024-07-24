@@ -5,6 +5,7 @@ LOG_MODULE_REGISTER(handler);
 
 K_SEM_DEFINE(phy_access_sem, 1, 1);
 uint16_t device_id = 0;
+enum dect_mac_phy_state current_state = IDLING;
 
 int dect_mac_phy_handler_start_modem(){
 
@@ -210,6 +211,10 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
     DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_tx_params, tx_params);
     DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(true_rx_params, rx_params);
 
+    /* setting the handle back to the good handle */
+    true_tx_params.handle = ((TX_RX << 28) | (params.handle & 0x0fffffff));
+    true_rx_params.handle = ((TX_RX << 28) | (params.handle & 0x0fffffff));
+
     struct nrf_modem_dect_phy_tx_rx_params true_params = {
         .tx = &true_tx_params,
         .rx = &true_rx_params,
@@ -259,8 +264,8 @@ void dect_mac_phy_handler_rx_stop(struct dect_mac_phy_handler_rx_stop_params par
 
 
 void dect_mac_phy_handler_link_config(){
-
-    
+    //TODO: implement this function
+    LOG_ERR("dect_mac_phy_handler_link_config() not implemented");
 }
 
 
