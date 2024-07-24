@@ -31,7 +31,7 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
 
     /* dont release the semaphore when switching from tx to rx in a combined operation */
-    if ((current_state == TRANSMITTING) && ((handle | 0xF0000000) == TX_RX))
+    if ((current_state == TRANSMITTING) && ((handle>>28) == TX_RX))
     {
         // switch from tx to rx
         current_state = RECEIVING;
