@@ -115,6 +115,27 @@ struct dect_phy_handler_tx_harq_params {
     uint64_t start_time;
 };
 
+struct dect_phy_handler_tx_rx_params {
+	uint32_t handle : 28; 
+    enum dect_phy_handler_tx_usage {
+        NO_HARQ,
+        HARQ,
+        BEACON,
+    } tx_usage;
+    bool lbt_enable;
+    uint8_t *data;
+    size_t data_size;
+    uint32_t receiver_id;
+    struct feedback{
+        uint32_t format;
+        union feedback_info info;
+    } feedback;
+    struct harq_tx_params harq;
+	enum nrf_modem_dect_phy_rx_mode rx_mode;
+    uint32_t rx_period_ms;
+	uint64_t start_time;
+};
+
 /* Header type 1, due to endianness the order is different than in the specification. */
 struct phy_ctrl_field_common_type1 {
 	uint32_t packet_length : 4;
