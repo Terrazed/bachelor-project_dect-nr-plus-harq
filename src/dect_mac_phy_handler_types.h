@@ -108,24 +108,28 @@ struct dect_mac_phy_handler_rx_params
 	uint64_t start_time;
 };
 
+enum dect_phy_handler_tx_usage
+{
+	NO_HARQ,
+	HARQ,
+	BEACON,
+};
+
+struct feedback
+{
+	uint32_t format;
+	union feedback_info info;
+};
+
 struct dect_mac_phy_handler_tx_params
 {
 	uint32_t handle : 28;
-	enum dect_phy_handler_tx_usage
-	{
-		NO_HARQ,
-		HARQ,
-		BEACON,
-	} tx_usage;
+	enum dect_phy_handler_tx_usage tx_usage;
 	bool lbt_enable;
 	uint8_t *data;
 	size_t data_size;
 	uint32_t receiver_id;
-	struct feedback
-	{
-		uint32_t format;
-		union feedback_info info;
-	} feedback;
+	struct feedback feedback;
 	struct harq_tx_params harq;
 	uint64_t start_time;
 };

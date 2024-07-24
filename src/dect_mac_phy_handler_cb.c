@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb,4);
+LOG_MODULE_REGISTER(handler_cb);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -26,7 +26,7 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
 
     if (err)
     {
-        LOG_ERR("op complete callback - error: %d", err);
+        LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
         return;
     }
 
@@ -66,20 +66,23 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 {
     LOG_DBG("pcc callback - time: %llu", *time);
 
+    LOG_WRN("header format: %d", ((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format);
+    LOG_WRN("phy type: %d", status->phy_type);
+
     if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
     {
         /* send a harq feedback */
         struct dect_mac_phy_handler_tx_harq_params harq = {
             .handle = 10,
             .lbt_enable = false,
-            .data = NULL,
+            .data = 0,
             .data_size = 0,
-            .receiver_id = 0,
+            .receiver_id = ((struct phy_ctrl_field_common_type2*)hdr->type_2)->transmitter_id_hi<<8 | ((struct phy_ctrl_field_common_type2*)hdr->type_2)->transmitter_id_lo,
             .harq = {
                 .redundancy_version = 0,
-                .new_data_indication = 0,
-                .harq_process_nr = 0,
-                .buffer_size = 0,
+                .new_data_indication = 1,
+                .harq_process_nr = 1,
+                .buffer_size = 0xf,
             },
             .start_time = status->stf_start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
         };
@@ -88,7 +91,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 
     }
 
-    if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
+    if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 1) && (status->phy_type == 1))
     {
         /* print acknowlegement */
         union feedback_info feedback;

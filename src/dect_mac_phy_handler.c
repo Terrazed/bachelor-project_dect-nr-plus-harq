@@ -190,6 +190,10 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_params, tx_params);
 
+
+    /* setting the handle back to the good handle */
+    true_params.handle = ((TX_HARQ << 28) | (params.handle & 0x0fffffff));
+    
     /* take the semaphore */
     // k_sem_take(&phy_access_sem, K_FOREVER);
 
@@ -373,7 +377,6 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
         output_params->phy_type = HEADER_TYPE_2;
         struct phy_ctrl_field_common_type2 *header = (struct phy_ctrl_field_common_type2 *)output_params->phy_header;
 
-        header->header_format = HEADER_FORMAT_001;
         header->packet_length_type = packet_length_type;
         header->packet_length = packet_length;
         header->short_network_id = (CONFIG_NETWORK_ID & 0xff);
@@ -390,12 +393,14 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
 
         if (input_params->tx_usage == HARQ)
         {
+            header->header_format = HEADER_FORMAT_000;
             header->df_red_version = input_params->harq.redundancy_version;
             header->df_ind = input_params->harq.new_data_indication;
             header->df_harq_process_nr = input_params->harq.harq_process_nr;
         }
         else
         {
+            header->header_format = HEADER_FORMAT_001;
             header->df_red_version = 0;
             header->df_ind = 0;
             header->df_harq_process_nr = 0;
