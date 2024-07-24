@@ -151,9 +151,49 @@ void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params){
 }
 
 
-void dect_mac_phy_handler_tx_harq(){
+void dect_mac_phy_handler_tx_harq(struct dect_phy_handler_tx_harq_params params){
 
+    /* convert to normal tx params */
+    struct dect_mac_phy_handler_tx_params tx_params = {
+        .handle = params.handle,
+        .tx_usage = NO_HARQ,
+        .lbt_enable = params.lbt_enable,
+        .data = params.data,
+        .data_size = params.data_size,
+        .receiver_id = params.receiver_id,
+        .feedback = {
+            .format = FEEDBACK_FORMAT_1,
+            .info = {
+                .format_1 = {
+                    .channel_quality_indicator = 2, //TODO PUT TRUE VALUE
+                    .transmission_feedback = 0,
+                    .harq_process_number = 0, //TODO PUT TRUE VALUE
+                    .buffer_status = 0, //TODO PUT TRUE VALUE
+                },
+            },
+        },
+        .harq = {
+            .redundancy_version = params.harq.redundancy_version,
+            .new_data_indication = params.harq.new_data_indication,
+            .harq_process_nr = params.harq.harq_process_nr,
+            .buffer_size = params.harq.buffer_size,
+        },
+        .start_time = params.start_time,
+    };
     
+
+    /* create true params */
+    DECT_MAC_PHY_HANDLER_TRUE_PARAM_CREATE(true_params, params);
+    
+    /* take the semaphore */
+    //k_sem_take(&phy_access_sem, K_FOREVER);
+
+    /* start the transmission */
+    int ret = nrf_modem_dect_phy_tx_harq(&true_params);
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_tx_harq() returned %d", ret);
+    }
+
 }
 
 

@@ -20,7 +20,7 @@ void dect_mac_phy_handler_init();
 void dect_mac_phy_handler_deinit();
 void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params);
 void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params);
-void dect_mac_phy_handler_tx_harq();
+void dect_mac_phy_handler_tx_harq(struct dect_phy_handler_tx_harq_params params);
 void dect_mac_phy_handler_tx_rx();
 void dect_mac_phy_handler_rssi();
 void dect_mac_phy_handler_rx_stop();

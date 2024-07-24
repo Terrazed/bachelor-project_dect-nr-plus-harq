@@ -105,6 +105,16 @@ struct dect_mac_phy_handler_tx_params {
     uint64_t start_time;
 };
 
+struct dect_phy_handler_tx_harq_params {
+    uint32_t handle : 28;
+    bool lbt_enable;
+    uint8_t *data;
+    size_t data_size;
+    uint32_t receiver_id;
+    struct harq_tx_params harq;
+    uint64_t start_time;
+};
+
 /* Header type 1, due to endianness the order is different than in the specification. */
 struct phy_ctrl_field_common_type1 {
 	uint32_t packet_length : 4;
