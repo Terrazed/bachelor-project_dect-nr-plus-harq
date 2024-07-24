@@ -183,7 +183,7 @@ void dect_mac_phy_handler_tx_harq(struct dect_phy_handler_tx_harq_params params)
     
 
     /* create true params */
-    DECT_MAC_PHY_HANDLER_TRUE_PARAM_CREATE(true_params, params);
+    DECT_MAC_PHY_HANDLER_TRUE_PARAM_CREATE(true_params, tx_params);
     
     /* take the semaphore */
     //k_sem_take(&phy_access_sem, K_FOREVER);
