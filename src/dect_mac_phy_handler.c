@@ -240,7 +240,7 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params){
     /* take the semaphore */
     k_sem_take(&phy_access_sem, K_FOREVER);
 
-    /* start the transmission */
+    /* start the rssi */
     int ret = nrf_modem_dect_phy_rssi(&true_params);
     if(ret){
         LOG_ERR("nrf_modem_dect_phy_rssi() returned %d", ret);
@@ -248,9 +248,13 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params){
 }
 
 
-void dect_mac_phy_handler_rx_stop(){
+void dect_mac_phy_handler_rx_stop(struct dect_mac_phy_handler_rx_stop_params params){
 
-    
+    /* start the rx stop */
+    int ret = nrf_modem_dect_phy_rx_stop(params.handle);
+    if(ret){
+        LOG_ERR("nrf_modem_dect_phy_rx_stop() returned %d", ret);
+    }
 }
 
 

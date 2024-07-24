@@ -136,6 +136,10 @@ struct dect_mac_phy_handler_rssi_params{
 	uint64_t start_time;
 };
 
+struct dect_mac_phy_handler_rx_stop_params{
+	uint32_t handle : 28;
+};
+
 /* Header type 1, due to endianness the order is different than in the specification. */
 struct phy_ctrl_field_common_type1 {
 	uint32_t packet_length : 4;
