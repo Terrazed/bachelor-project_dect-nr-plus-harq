@@ -185,6 +185,8 @@ union dect_mac_phy_handler_params
 	struct dect_mac_phy_handler_rx_stop_params rx_stop_params;
 };
 
+#define NO_PARAMS (union dect_mac_phy_handler_params*) NULL
+
 /* Header type 1, due to endianness the order is different than in the specification. */
 struct phy_ctrl_field_common_type1
 {

@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb);
+LOG_MODULE_REGISTER(handler_cb,3);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -26,12 +26,12 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
 
     if (err)
     {
-        LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
-        if(err == NRF_MODEM_DECT_PHY_ERR_NOT_ALLOWED)
+        if(err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
         {
+            LOG_WRN("retrying operation");
             dect_mac_phy_handler_queue_operation_failed_retry();
         }
-        else
+        else if(err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
         {
             LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
         }
@@ -79,8 +79,6 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 {
     LOG_DBG("pcc callback - time: %llu", *time);
 
-    LOG_WRN("header format: %d", ((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format);
-    LOG_WRN("phy type: %d", status->phy_type);
 
     if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
     {
@@ -100,7 +98,6 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
             .start_time = status->stf_start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
         };
         dect_mac_phy_handler_tx_harq(harq);
-
 
     }
 
@@ -129,7 +126,8 @@ void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 
     if(len > 0)
     {
-        LOG_INF("Received data: %s", data);
+        LOG_INF("Received data: %.*s, length: %d", len, data, len);
+
     }
     else
     {

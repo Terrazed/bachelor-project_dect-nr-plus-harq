@@ -1,27 +1,29 @@
 #include "dect_mac_phy_handler_queue.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(phy_queue);
+LOG_MODULE_REGISTER(phy_queue,3);
 
 K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE, dect_mac_phy_queue_thread, NULL, NULL, NULL, 10, 0, 0);
-K_SEM_DEFINE(phy_layer_sem, 0, 1);
+K_SEM_DEFINE(phy_layer_sem, 1, 1);
 K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
 K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_handler_queue_timer_callback, NULL);
 
 sys_slist_t dect_mac_phy_handler_queue;
 struct dect_mac_phy_handler_queue_item current_item = {0};
+uint32_t dect_mac_phy_handler_queue_operation_failed_counter = 0;
 
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority)
 {
 
-    LOG_DBG("Adding item to the queue - function: %d, priority: %d", function, priority);
+    LOG_DBG("Adding item to the queue - function: %d, priority: %u", function, priority);
 
     /* locks the list while working on it */
     k_mutex_lock(&queue_mutex, K_FOREVER);
     {
         /* create the item */
         struct dect_mac_phy_handler_queue_item *item;
+        LOG_DBG("Allocating memory for the queue item");
         item = k_malloc(sizeof(struct dect_mac_phy_handler_queue_item)); // TODO: use memory pool instead of malloc
 
         /* check if the item was allocated */
@@ -32,8 +34,16 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
         }
 
         /* init the item */
+        LOG_DBG("Initializing the queue item");
         item->function = function;
-        item->params = *params;
+        if(params != NULL)
+        {
+            item->params = *params;
+        }
+        else
+        {
+            item->params = (union dect_mac_phy_handler_params){0};
+        }
         item->priority = priority;
 
         /* check if the maximum number of item in the queue is already reached */
@@ -93,44 +103,55 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
     switch(function)
     {
         case CAPABILITY_GET:
+            LOG_DBG("capability get");
             dect_mac_phy_handler_capability_get();
             break;
         case INIT:
+            LOG_DBG("init");
             dect_mac_phy_handler_init();
             break;
         case DEINIT:
+            LOG_DBG("deinit");
             dect_mac_phy_handler_deinit();
             break;
         case RX:
+            LOG_DBG("rx");
             params->rx_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_rx(params->rx_params);
             break;
         case TX:
+            LOG_DBG("tx");
             params->tx_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_tx(params->tx_params);
             break;
         case TX_HARQ:
+            LOG_DBG("tx harq");
             params->tx_harq_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_tx_harq(params->tx_harq_params);
             break;
         case TX_RX:
+            LOG_DBG("tx rx");
             params->tx_rx_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_tx_rx(params->tx_rx_params);
             break;
         case RSSI:
+            LOG_DBG("rssi");
             dect_mac_phy_handler_rssi(params->rssi_params);
             break;
         case RX_STOP:
+            LOG_DBG("rx stop");
             dect_mac_phy_handler_rx_stop(params->rx_stop_params);
             break;
         case LINK_CONFIG:
+            LOG_DBG("link config");
             dect_mac_phy_handler_link_config();
             break;
         case TIME_GET:
+            LOG_DBG("time get");
             dect_mac_phy_handler_time_get();
             break;
         default:
-            LOG_ERR("Unknown function: %d", item.function);
+            LOG_ERR("Unknown function: %d", function);
             return -1; // TODO: return a proper error code
     }
 
@@ -138,6 +159,8 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
 
 void dect_mac_phy_queue_thread()
 {
+
+    LOG_DBG("Starting the queue thread");
 
     while (1)
     {
@@ -149,6 +172,8 @@ void dect_mac_phy_queue_thread()
 
         /* wait for a new item in the queue */
         k_sem_take(&queue_item_sem, K_FOREVER);
+
+        LOG_DBG("Got a new item in the queue");
 
         struct dect_mac_phy_handler_queue_item local_item;
 
@@ -178,6 +203,7 @@ void dect_mac_phy_queue_thread()
         k_mutex_unlock(&queue_mutex);
 
         /* reset fail counter and execute the function */
+        LOG_DBG("Executing the function");
         dect_mac_phy_handler_queue_operation_failed_counter = 0;
         dect_mac_phy_queue_function_execute(local_item.function, &local_item.params);
     }

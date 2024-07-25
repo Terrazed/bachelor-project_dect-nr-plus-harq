@@ -2,6 +2,7 @@
 #define DECT_MAC_PHY_HANDLER_QUEUE_H
 
 #include <zephyr/kernel.h>
+#include <zephyr/sys/slist.h>
 
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler.h"
@@ -66,7 +67,7 @@ extern struct k_mutex queue_mutex;
 extern struct k_timer dect_mac_phy_handler_queue_operation_failed_timer;
 
 /* counter that counts how many times the operation has tried to execute but failed */
-uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
+extern uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
 
 
 #endif // DECT_MAC_PHY_HANDLER_QUEUE_H
