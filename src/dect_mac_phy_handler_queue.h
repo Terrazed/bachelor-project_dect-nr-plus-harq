@@ -32,6 +32,9 @@ extern sys_slist_t dect_mac_phy_handler_queue;
 /* semaphore that restrain access to the dect phy layer (declared in dect_mac_phy_handler_queue.c) */
 extern struct k_sem phy_layer_sem;
 
+/* semaphore that notify the thread that an element is waiting in the queue */
+extern struct k_sem queue_item_sem;
+
 /* mutex to protect the linked list that is not thread-safe (declared in dect_mac_phy_handler_queue.c) */
 extern struct k_mutex queue_mutex;
 
