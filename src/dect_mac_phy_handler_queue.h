@@ -12,6 +12,11 @@
 /* maximum number of item that the queue can contains */
 #define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 32
 
+/* maximum number of retry before giving up on an operation */
+#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_RETRY 10
+
+#define DECT_MAC_PHY_HANDLER_QUEUE_RETRY_DELAY K_MSEC(10)
+
 enum dect_mac_phy_handler_queue_priority{
     PRIORITY_PERMANENT = 0,
     PRIORITY_LOW = 10000,
@@ -37,6 +42,12 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
 /* thread where the list is read whenever something is in it */
 void dect_mac_phy_queue_thread();
 
+/* function to retry the scheduling of an operation */
+void dect_mac_phy_handler_queue_operation_failed_retry();
+
+/* timer callback that retry the scheduling of an operation */
+void dect_mac_phy_handler_queue_timer_callback(struct k_timer *timer_id);
+
 /* single linked list that to handle the planification of the phy layer actions (declared in dect_mac_phy_handler_queue.c) */
 extern sys_slist_t dect_mac_phy_handler_queue;
 
@@ -50,6 +61,12 @@ extern struct k_sem queue_item_sem;
 
 /* mutex to protect the linked list that is not thread-safe (declared in dect_mac_phy_handler_queue.c) */
 extern struct k_mutex queue_mutex;
+
+/* timer that activate when an operation has failed to execute to retry executing it later */
+extern struct k_timer dect_mac_phy_handler_queue_operation_failed_timer;
+
+/* counter that counts how many times the operation has tried to execute but failed */
+uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
 
 
 #endif // DECT_MAC_PHY_HANDLER_QUEUE_H

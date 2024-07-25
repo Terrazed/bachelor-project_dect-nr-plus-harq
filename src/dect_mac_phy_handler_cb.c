@@ -17,7 +17,7 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
@@ -27,6 +27,15 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     if (err)
     {
         LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+        if(err == NRF_MODEM_DECT_PHY_ERR_NOT_ALLOWED)
+        {
+            dect_mac_phy_handler_queue_operation_failed_retry();
+        }
+        else
+        {
+            LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+        }
+
         return;
     }
 
@@ -38,8 +47,12 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
     else
     {
-        /* release the semaphore */
-        k_sem_give(&phy_access_sem);
+        if(((handle & (1<<27))>>27) == 1) // if the operation comes from the queue
+        {
+            /* release the semaphore */
+            k_sem_give(&phy_layer_sem);
+        }
+        
     }
 }
 
@@ -48,7 +61,7 @@ void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_
     LOG_DBG("rssi callback - time: %llu", *time);
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, uint32_t handle)
@@ -141,7 +154,7 @@ void dect_mac_phy_link_config_cb(const uint64_t *time, enum nrf_modem_dect_phy_e
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
@@ -155,7 +168,7 @@ void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err 
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_capability *capability)
@@ -165,7 +178,6 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
     if (err)
     {
         LOG_ERR("capability get callback - error: %d", err);
-        k_sem_give(&phy_access_sem);
         return;
     }
 
@@ -183,7 +195,7 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
     capabilities.beta = capability->variant[0].beta;
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
@@ -197,7 +209,7 @@ void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err er
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 struct nrf_modem_dect_phy_callbacks *dect_mac_phy_handler_get_callbacks(void)

@@ -7,6 +7,7 @@ K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STAC
 K_SEM_DEFINE(phy_layer_sem, 0, 1);
 K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
+K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_handler_queue_operation_failed_retry, NULL);
 
 sys_slist_t dect_mac_phy_handler_queue;
 struct dect_mac_phy_handler_queue_item current_item = {0};
@@ -101,15 +102,19 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
             dect_mac_phy_handler_deinit();
             break;
         case RX:
+            params->rx_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_rx(params->rx_params);
             break;
         case TX:
+            params->tx_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_tx(params->tx_params);
             break;
         case TX_HARQ:
+            params->tx_harq_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_tx_harq(params->tx_harq_params);
             break;
         case TX_RX:
+            params->tx_rx_params.handle |= (1<<27); // set in the handle that the operation comes from the queue
             dect_mac_phy_handler_tx_rx(params->tx_rx_params);
             break;
         case RSSI:
@@ -172,7 +177,33 @@ void dect_mac_phy_queue_thread()
         }
         k_mutex_unlock(&queue_mutex);
 
-        /* execute the function */
+        /* reset fail counter and execute the function */
+        dect_mac_phy_handler_queue_operation_failed_counter = 0;
         dect_mac_phy_queue_function_execute(local_item.function, &local_item.params);
     }
+}
+
+void dect_mac_phy_handler_queue_operation_failed_retry(struct k_timer *timer)
+{
+    LOG_DBG("Retrying operation");
+
+    /* increment the counter */
+    dect_mac_phy_handler_queue_operation_failed_counter++;
+    
+    /* check if over the operation max retry limit */
+    if(dect_mac_phy_handler_queue_operation_failed_counter > DECT_MAC_PHY_HANDLER_QUEUE_MAX_RETRY)
+    {
+        LOG_ERR("Operation failed too many times, aborting");
+        k_sem_give(&phy_layer_sem);
+    }
+    else
+    {
+        k_timer_start(&dect_mac_phy_handler_queue_operation_failed_timer, DECT_MAC_PHY_HANDLER_QUEUE_RETRY_DELAY, K_NO_WAIT);
+    }
+
+}
+
+void dect_mac_phy_handler_queue_timer_callback(struct k_timer *timer_id)
+{
+    dect_mac_phy_queue_function_execute(current_item.function, &current_item.params);
 }

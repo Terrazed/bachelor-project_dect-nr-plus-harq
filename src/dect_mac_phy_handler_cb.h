@@ -5,6 +5,7 @@
 #include <nrf_modem_dect_phy.h>
 
 #include "dect_mac_phy_handler_types.h"
+#include "dect_mac_phy_handler_queue.h"
 
 /* variable that holds the capability of the modem (declared in dect_mac_phy_handler_cb.c) */
 extern struct dect_capabilities capabilities;
