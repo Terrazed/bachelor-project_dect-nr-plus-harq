@@ -3,7 +3,6 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(handler);
 
-K_SEM_DEFINE(phy_access_sem, 1, 1);
 uint16_t device_id = 0;
 enum dect_mac_phy_state current_state = IDLING;
 
@@ -61,10 +60,6 @@ int dect_mac_phy_handler_stop_modem()
 
 void dect_mac_phy_handler_capability_get()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = GETTING_CAPABILITY;
 
@@ -78,10 +73,6 @@ void dect_mac_phy_handler_capability_get()
 
 void dect_mac_phy_handler_init()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = INITIALIZING;
 
@@ -101,10 +92,6 @@ void dect_mac_phy_handler_init()
 
 void dect_mac_phy_handler_deinit()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = DEINITIALIZING;
 
@@ -122,9 +109,6 @@ void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params)
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(true_params, params);
 
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = RECEIVING;
 
@@ -141,9 +125,6 @@ void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params)
 
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_params, params);
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
 
     /* indicating current state */
     current_state = TRANSMITTING;
@@ -193,9 +174,6 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
 
     /* setting the handle back to the good handle */
     true_params.handle = ((TX_HARQ << 28) | (params.handle & 0x0fffffff));
-    
-    /* take the semaphore */
-    // k_sem_take(&phy_access_sem, K_FOREVER);
 
     /* indicating current state */
     // current_state = GETTING_CAPABILITY
@@ -247,9 +225,6 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
         .rx = true_rx_params,
     };
 
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = TRANSMITTING;
 
@@ -272,9 +247,6 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params)
         .duration = params.duration,
         .reporting_interval = params.reporting_interval,
     };
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
 
     /* indicating current state */
     current_state = MEASURING_RSSI;
@@ -309,10 +281,6 @@ void dect_mac_phy_handler_link_config()
 
 void dect_mac_phy_handler_time_get()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = GETTING_TIME;
 
