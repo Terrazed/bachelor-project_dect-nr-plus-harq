@@ -23,9 +23,9 @@ int main(void)
 
     LOG_DBG("Modem started");
 
-    uint8_t data[10];
-    size_t data_size;
-    data_size = sprintf(data, "Hello");
+    static uint8_t data[150];
+    static size_t data_size;
+    data_size = sprintf(data, "Hello jhgfiuhasidufhasidhf isidufh sajhd flkjashd fiviyuiviytuyguiygouiygbguyvighvgturyuovuoyigvb8i9uogjjj");
 
     //struct dect_mac_phy_handler_tx_params tx_params = {
     //    .handle = 10,
@@ -50,22 +50,22 @@ int main(void)
     //};
     //LOG_DBG("transmitting");
     //dect_mac_phy_handler_tx(tx_params);
+    //dect_phy_queue_put(TX, (union dect_mac_phy_handler_params*)&tx_params, PRIORITY_MEDIUM);
 
-    //struct dect_mac_phy_handler_rx_params rx_params = {
-    //    .handle = 20,
-    //    .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_CONTINUOUS,
-    //    .rx_period_ms = 10000,
-    //    .receiver_identity = 0,
-    //    .start_time = 0,
-    //};
-    //LOG_DBG("receiving");
-    //dect_mac_phy_handler_rx(rx_params);
+    struct dect_mac_phy_handler_rx_params rx_params = {
+        .handle = 20,
+        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+        .rx_period_ms = 10000,
+        .receiver_identity = 0,
+        .start_time = 0,
+    };
+    dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_PERMANENT);
 
     // k_sleep(K_MSEC(11000));
 
     struct dect_mac_phy_handler_tx_rx_params tx_rx_params = {
         .handle = 30,
-        .tx_usage = HARQ,
+        .tx_usage = NO_HARQ,
         .lbt_enable = false,
         .data = &data,
         .data_size = data_size,
@@ -87,8 +87,11 @@ int main(void)
         .start_time = 0,
     };
 
-    LOG_DBG("transmitting and receiving");
-    dect_mac_phy_handler_tx_rx(tx_rx_params);
+    dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&tx_rx_params, PRIORITY_MEDIUM);
+
+    //k_sleep(K_MSEC(2000));
+    //LOG_DBG("transmitting and receiving");
+    //dect_mac_phy_handler_tx_rx(tx_rx_params);
 
     //err = dect_mac_phy_handler_stop_modem();
     //if (err)
