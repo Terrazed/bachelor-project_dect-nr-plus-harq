@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler);
+LOG_MODULE_REGISTER(handler,3);
 
 uint16_t device_id = 0;
 enum dect_mac_phy_state current_state = IDLING;
@@ -20,6 +20,7 @@ int dect_mac_phy_handler_start_modem()
     }
 
     /* set the callbacks for the dect phy modem */
+    LOG_DBG("Setting callbacks");
     ret = nrf_modem_dect_phy_callback_set(dect_mac_phy_handler_get_callbacks());
     if (ret)
     {
@@ -28,13 +29,19 @@ int dect_mac_phy_handler_start_modem()
     }
 
     /* Get the device ID. */
+    LOG_DBG("Getting device ID");
     hwinfo_get_device_id((void *)&device_id, sizeof(device_id));
+    //device_id = 0x1234; // TODO: remove this line and uncomment the line above
 
     /* get the capability of the api */
-    dect_mac_phy_handler_capability_get();
+    //dect_mac_phy_handler_capability_get();
+    LOG_DBG("Getting capability");
+    dect_phy_queue_put(CAPABILITY_GET, NO_PARAMS, PRIORITY_CRITICAL);
 
     /* initialize the dect phy modem */
-    dect_mac_phy_handler_init();
+    //dect_mac_phy_handler_init();
+    LOG_DBG("Initializing");
+    dect_phy_queue_put(INIT, NO_PARAMS, PRIORITY_CRITICAL);
 
     return 0; // Success
 }
@@ -46,6 +53,7 @@ int dect_mac_phy_handler_stop_modem()
 
     /* deinitialize the dect phy modem */
     dect_mac_phy_handler_deinit();
+    dect_phy_queue_put(DEINIT, NO_PARAMS, PRIORITY_CRITICAL);
 
     /* deinitialize the modem lib */
     ret = nrf_modem_lib_shutdown();
