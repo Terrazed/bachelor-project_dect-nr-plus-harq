@@ -3,7 +3,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(phy_queue);
 
-K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE, dect_phy_queue_thread, NULL, NULL, NULL, 10, 0, 0);
+K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE, dect_mac_phy_queue_thread, NULL, NULL, NULL, 10, 0, 0);
 K_SEM_DEFINE(phy_layer_sem, 0, 1);
 K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
@@ -19,8 +19,8 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     k_mutex_lock(&queue_mutex, K_FOREVER);
     {
         /* create the item */
-        struct dect_phy_handler_queue_item *item;
-        item = k_malloc(sizeof(struct dect_phy_handler_queue_item)); // TODO: use memory pool instead of malloc
+        struct dect_mac_phy_handler_queue_item *item;
+        item = k_malloc(sizeof(struct dect_mac_phy_handler_queue_item)); // TODO: use memory pool instead of malloc
 
         /* check if the item was allocated */
         if (item == NULL)
@@ -57,7 +57,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
                  previous_node = node, node = sys_slist_peek_next(node))               // set the previous node to the current node and the current node to the next node
             { 
                 /* get the current item */
-                struct dect_phy_handler_queue_item *current_item = CONTAINER_OF(node, struct dect_phy_handler_queue_item, node);
+                struct dect_mac_phy_handler_queue_item *current_item = CONTAINER_OF(node, struct dect_mac_phy_handler_queue_item, node);
                 /* if the current item has a lower priority than the item to insert, insert the item before the current item */
                 if (current_item->priority < item->priority)
                 {
@@ -81,12 +81,12 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     return 0;
 }
 
-int dect_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
+int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
 {
     // TODO: implement this function
 }
 
-void dect_phy_queue_thread()
+void dect_mac_phy_queue_thread()
 {
 
     while (1)
@@ -100,14 +100,14 @@ void dect_phy_queue_thread()
         /* wait for a new item in the queue */
         k_sem_take(&queue_item_sem, K_FOREVER);
 
-        struct dect_phy_handler_queue_item local_item;
+        struct dect_mac_phy_handler_queue_item local_item;
 
         /* locks the list while working on it */
         k_mutex_lock(&queue_mutex, K_FOREVER);
         {
             /* get the first item in the list */
             sys_snode_t *node = sys_slist_get(&dect_mac_phy_handler_queue);
-            struct dect_phy_handler_queue_item *item = CONTAINER_OF(node, struct dect_phy_handler_queue_item, node);
+            struct dect_mac_phy_handler_queue_item *item = CONTAINER_OF(node, struct dect_mac_phy_handler_queue_item, node);
 
             /* copy the item on the stack */
             local_item = *item;
@@ -128,6 +128,6 @@ void dect_phy_queue_thread()
         k_mutex_unlock(&queue_mutex);
 
         /* execute the function */
-        dect_phy_queue_function_execute(local_item.function, &local_item.params);
+        dect_mac_phy_queue_function_execute(local_item.function, &local_item.params);
     }
 }

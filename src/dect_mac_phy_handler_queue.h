@@ -17,11 +17,11 @@ enum dect_mac_phy_handler_queue_priority{
     PRIORITY_LOW = 10000,
     PRIORITY_MEDIUM = 20000,
     PRIORITY_HIGH = 30000,
-    PRIORITY_ASYNC = UINT32_MAX,
+    PRIORITY_CRITICAL = UINT32_MAX,
 };
 
 /* struct that represents an item in the queue */
-struct dect_phy_handler_queue_item {
+struct dect_mac_phy_handler_queue_item {
     sys_snode_t node;
     enum dect_mac_phy_function function;
     union dect_mac_phy_handler_params params;
@@ -32,10 +32,10 @@ struct dect_phy_handler_queue_item {
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority);
 
 /* function to execute an operation from the waiting queue of the dect phy api */
-int dect_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
+int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
 
 /* thread where the list is read whenever something is in it */
-void dect_phy_queue_thread();
+void dect_mac_phy_queue_thread();
 
 /* single linked list that to handle the planification of the phy layer actions (declared in dect_mac_phy_handler_queue.c) */
 extern sys_slist_t dect_mac_phy_handler_queue;
