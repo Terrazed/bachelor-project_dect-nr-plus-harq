@@ -9,6 +9,7 @@ K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
 
 sys_slist_t dect_mac_phy_handler_queue;
+struct dect_mac_phy_handler_queue_item current_item = {0};
 
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority)
 {
@@ -83,7 +84,51 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
 
 int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
 {
-    // TODO: implement this function
+    /* saving the current operation in case of a failed operation */
+    current_item.function = function;
+    current_item.params = *params;
+
+    /* execute the operation */
+    switch(function)
+    {
+        case CAPABILITY_GET:
+            dect_mac_phy_handler_capability_get();
+            break;
+        case INIT:
+            dect_mac_phy_handler_init();
+            break;
+        case DEINIT:
+            dect_mac_phy_handler_deinit();
+            break;
+        case RX:
+            dect_mac_phy_handler_rx(params->rx_params);
+            break;
+        case TX:
+            dect_mac_phy_handler_tx(params->tx_params);
+            break;
+        case TX_HARQ:
+            dect_mac_phy_handler_tx_harq(params->tx_harq_params);
+            break;
+        case TX_RX:
+            dect_mac_phy_handler_tx_rx(params->tx_rx_params);
+            break;
+        case RSSI:
+            dect_mac_phy_handler_rssi(params->rssi_params);
+            break;
+        case RX_STOP:
+            dect_mac_phy_handler_rx_stop(params->rx_stop_params);
+            break;
+        case LINK_CONFIG:
+            dect_mac_phy_handler_link_config();
+            break;
+        case TIME_GET:
+            dect_mac_phy_handler_time_get();
+            break;
+        default:
+            LOG_ERR("Unknown function: %d", item.function);
+            return -1; // TODO: return a proper error code
+    }
+
 }
 
 void dect_mac_phy_queue_thread()

@@ -40,6 +40,8 @@ void dect_mac_phy_queue_thread();
 /* single linked list that to handle the planification of the phy layer actions (declared in dect_mac_phy_handler_queue.c) */
 extern sys_slist_t dect_mac_phy_handler_queue;
 
+extern struct dect_mac_phy_handler_queue_item current_item;
+
 /* semaphore that restrain access to the dect phy layer (declared in dect_mac_phy_handler_queue.c) */
 extern struct k_sem phy_layer_sem;
 
