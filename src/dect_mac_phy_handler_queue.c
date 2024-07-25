@@ -7,7 +7,7 @@ K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STAC
 K_SEM_DEFINE(phy_layer_sem, 0, 1);
 K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
-K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_handler_queue_operation_failed_retry, NULL);
+K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_handler_queue_timer_callback, NULL);
 
 sys_slist_t dect_mac_phy_handler_queue;
 struct dect_mac_phy_handler_queue_item current_item = {0};
