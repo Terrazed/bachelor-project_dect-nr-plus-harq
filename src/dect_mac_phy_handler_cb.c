@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb);
+LOG_MODULE_REGISTER(handler_cb,3);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -17,7 +17,7 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
@@ -26,7 +26,16 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
 
     if (err)
     {
-        LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+        if(err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
+        {
+            LOG_INF("operation with handle: %x couldn't be started at the requested time, retrying...", handle);
+            dect_mac_phy_handler_queue_operation_failed_retry();
+        }
+        else if(err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
+        {
+            LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+        }
+
         return;
     }
 
@@ -38,8 +47,12 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
     else
     {
-        /* release the semaphore */
-        k_sem_give(&phy_access_sem);
+        if(((handle & (1<<27))>>27) == 1) // if the operation comes from the queue
+        {
+            /* release the semaphore */
+            k_sem_give(&phy_layer_sem);
+        }
+        
     }
 }
 
@@ -48,7 +61,7 @@ void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_
     LOG_DBG("rssi callback - time: %llu", *time);
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, uint32_t handle)
@@ -64,16 +77,14 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
 
 void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr)
 {
-    LOG_DBG("pcc callback - time: %llu", *time);
+    LOG_DBG("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
 
-    LOG_WRN("header format: %d", ((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format);
-    LOG_WRN("phy type: %d", status->phy_type);
 
     if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
     {
         /* send a harq feedback */
         struct dect_mac_phy_handler_tx_harq_params harq = {
-            .handle = 10,
+            .handle =  10 | (1<<27),
             .lbt_enable = false,
             .data = 0,
             .data_size = 0,
@@ -84,9 +95,12 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
                 .harq_process_nr = 1,
                 .buffer_size = 0xf,
             },
-            .start_time = status->stf_start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
+            .start_time = status->stf_start_time + (3 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
         };
+        //LOG_INF("request HARQ feedback");
         dect_mac_phy_handler_tx_harq(harq);
+        dect_phy_queue_put(PLACEHOLDER, NO_PARAMS, PRIORITY_CRITICAL);
+        //LOG_INF("HARQ feedback requested");
 
 
     }
@@ -112,11 +126,17 @@ void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_de
 
 void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_status *status, const void *data, uint32_t len)
 {
+    /* saving the data locally to ensure data validity */
+    uint8_t data_local[len];
+    memcpy(data_local, data, len);
+
+
     LOG_DBG("pdc callback - time: %llu", *time);
 
     if(len > 0)
     {
-        LOG_INF("Received data: %s", data);
+        LOG_INF("Received data: %.*s, length: %d", len, data_local, len);
+
     }
     else
     {
@@ -141,7 +161,7 @@ void dect_mac_phy_link_config_cb(const uint64_t *time, enum nrf_modem_dect_phy_e
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
@@ -155,7 +175,7 @@ void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err 
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_capability *capability)
@@ -165,7 +185,6 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
     if (err)
     {
         LOG_ERR("capability get callback - error: %d", err);
-        k_sem_give(&phy_access_sem);
         return;
     }
 
@@ -183,7 +202,7 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
     capabilities.beta = capability->variant[0].beta;
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
@@ -197,7 +216,7 @@ void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err er
     }
 
     /* release the semaphore */
-    k_sem_give(&phy_access_sem);
+    k_sem_give(&phy_layer_sem);
 }
 
 struct nrf_modem_dect_phy_callbacks *dect_mac_phy_handler_get_callbacks(void)

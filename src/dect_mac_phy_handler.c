@@ -1,9 +1,8 @@
 #include "dect_mac_phy_handler.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler);
+LOG_MODULE_REGISTER(handler,3);
 
-K_SEM_DEFINE(phy_access_sem, 1, 1);
 uint16_t device_id = 0;
 enum dect_mac_phy_state current_state = IDLING;
 
@@ -21,6 +20,7 @@ int dect_mac_phy_handler_start_modem()
     }
 
     /* set the callbacks for the dect phy modem */
+    LOG_DBG("Setting callbacks");
     ret = nrf_modem_dect_phy_callback_set(dect_mac_phy_handler_get_callbacks());
     if (ret)
     {
@@ -29,13 +29,19 @@ int dect_mac_phy_handler_start_modem()
     }
 
     /* Get the device ID. */
+    LOG_DBG("Getting device ID");
     hwinfo_get_device_id((void *)&device_id, sizeof(device_id));
+    //device_id = 0x1234; // TODO: remove this line and uncomment the line above
 
     /* get the capability of the api */
-    dect_mac_phy_handler_capability_get();
+    //dect_mac_phy_handler_capability_get();
+    LOG_DBG("Getting capability");
+    dect_phy_queue_put(CAPABILITY_GET, NO_PARAMS, PRIORITY_CRITICAL);
 
     /* initialize the dect phy modem */
-    dect_mac_phy_handler_init();
+    //dect_mac_phy_handler_init();
+    LOG_DBG("Initializing");
+    dect_phy_queue_put(INIT, NO_PARAMS, PRIORITY_CRITICAL);
 
     return 0; // Success
 }
@@ -47,6 +53,7 @@ int dect_mac_phy_handler_stop_modem()
 
     /* deinitialize the dect phy modem */
     dect_mac_phy_handler_deinit();
+    dect_phy_queue_put(DEINIT, NO_PARAMS, PRIORITY_CRITICAL);
 
     /* deinitialize the modem lib */
     ret = nrf_modem_lib_shutdown();
@@ -61,10 +68,6 @@ int dect_mac_phy_handler_stop_modem()
 
 void dect_mac_phy_handler_capability_get()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = GETTING_CAPABILITY;
 
@@ -78,10 +81,6 @@ void dect_mac_phy_handler_capability_get()
 
 void dect_mac_phy_handler_init()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = INITIALIZING;
 
@@ -101,10 +100,6 @@ void dect_mac_phy_handler_init()
 
 void dect_mac_phy_handler_deinit()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = DEINITIALIZING;
 
@@ -122,9 +117,6 @@ void dect_mac_phy_handler_rx(struct dect_mac_phy_handler_rx_params params)
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_RX_PARAM_CREATE(true_params, params);
 
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = RECEIVING;
 
@@ -141,9 +133,6 @@ void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params)
 
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_params, params);
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
 
     /* indicating current state */
     current_state = TRANSMITTING;
@@ -193,9 +182,6 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
 
     /* setting the handle back to the good handle */
     true_params.handle = ((TX_HARQ << 28) | (params.handle & 0x0fffffff));
-    
-    /* take the semaphore */
-    // k_sem_take(&phy_access_sem, K_FOREVER);
 
     /* indicating current state */
     // current_state = GETTING_CAPABILITY
@@ -247,9 +233,6 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
         .rx = true_rx_params,
     };
 
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = TRANSMITTING;
 
@@ -272,9 +255,6 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params)
         .duration = params.duration,
         .reporting_interval = params.reporting_interval,
     };
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
 
     /* indicating current state */
     current_state = MEASURING_RSSI;
@@ -309,10 +289,6 @@ void dect_mac_phy_handler_link_config()
 
 void dect_mac_phy_handler_time_get()
 {
-
-    /* take the semaphore */
-    k_sem_take(&phy_access_sem, K_FOREVER);
-
     /* indicating current state */
     current_state = GETTING_TIME;
 
