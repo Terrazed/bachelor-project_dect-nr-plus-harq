@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb,4);
+LOG_MODULE_REGISTER(handler_cb,3);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -22,13 +22,13 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
 
 void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
 {
-    LOG_INF("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+    LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
 
     if (err)
     {
         if(err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
         {
-            LOG_WRN("retrying operation");
+            LOG_INF("operation with handle: %x couldn't be started at the requested time, retrying...", handle);
             dect_mac_phy_handler_queue_operation_failed_retry();
         }
         else if(err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
@@ -77,7 +77,7 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
 
 void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr)
 {
-    LOG_INF("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
+    LOG_DBG("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
 
 
     if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))

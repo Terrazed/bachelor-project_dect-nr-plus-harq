@@ -221,7 +221,7 @@ void dect_mac_phy_handler_queue_operation_failed_retry(struct k_timer *timer)
     /* check if over the operation max retry limit */
     if(dect_mac_phy_handler_queue_operation_failed_counter > DECT_MAC_PHY_HANDLER_QUEUE_MAX_RETRY)
     {
-        LOG_ERR("Operation failed too many times, aborting");
+        LOG_WRN("Operation failed too many times, aborting");
         k_sem_give(&phy_layer_sem);
     }
     else
