@@ -7,6 +7,7 @@
 /* enumerate all the function that the phy api can do and give them a number */
 enum dect_mac_phy_function
 {
+	PLACEHOLDER = 0, // use this if you want handle the operation by yourself (can be dangerous)
 	CAPABILITY_GET = 1,
 	INIT = 2,
 	DEINIT = 3,

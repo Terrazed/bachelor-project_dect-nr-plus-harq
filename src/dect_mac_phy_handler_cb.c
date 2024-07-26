@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb,3);
+LOG_MODULE_REGISTER(handler_cb,4);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -22,7 +22,7 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
 
 void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
 {
-    LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+    LOG_INF("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
 
     if (err)
     {
@@ -77,14 +77,14 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
 
 void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr)
 {
-    LOG_DBG("pcc callback - time: %llu", *time);
+    LOG_INF("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
 
 
     if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
     {
         /* send a harq feedback */
         struct dect_mac_phy_handler_tx_harq_params harq = {
-            .handle = 10,
+            .handle =  10 | (1<<27),
             .lbt_enable = false,
             .data = 0,
             .data_size = 0,
@@ -95,9 +95,13 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
                 .harq_process_nr = 1,
                 .buffer_size = 0xf,
             },
-            .start_time = status->stf_start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
+            .start_time = status->stf_start_time + (3 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
         };
+        //LOG_INF("request HARQ feedback");
         dect_mac_phy_handler_tx_harq(harq);
+        dect_phy_queue_put(PLACEHOLDER, NO_PARAMS, PRIORITY_CRITICAL);
+        //LOG_INF("HARQ feedback requested");
+
 
     }
 
@@ -122,11 +126,16 @@ void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_de
 
 void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_status *status, const void *data, uint32_t len)
 {
+    /* saving the data locally to ensure data validity */
+    uint8_t data_local[len];
+    memcpy(data_local, data, len);
+
+
     LOG_DBG("pdc callback - time: %llu", *time);
 
     if(len > 0)
     {
-        LOG_INF("Received data: %.*s, length: %d", len, data, len);
+        LOG_INF("Received data: %.*s, length: %d", len, data_local, len);
 
     }
     else

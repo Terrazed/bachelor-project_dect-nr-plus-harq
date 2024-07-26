@@ -150,6 +150,8 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
             LOG_DBG("time get");
             dect_mac_phy_handler_time_get();
             break;
+        case PLACEHOLDER:
+            break;
         default:
             LOG_ERR("Unknown function: %d", function);
             return -1; // TODO: return a proper error code

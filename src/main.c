@@ -25,7 +25,7 @@ int main(void)
 
     static uint8_t data[150];
     static size_t data_size;
-    data_size = sprintf(data, "Hello jhgfiuhasidufhasidhf isidufh sajhd flkjashd fiviyuiviytuyguiygouiygbguyvighvgturyuovuoyigvb8i9uogjjj");
+    data_size = sprintf(data, "SALUT A TOUS LES AMIS C'EST DAVIDLAPOUTRE ET ON SE RETROUVE POUR UNE NOUVELLE VIDEO DE FORTNITE BATTLE ROYALE QUE JE VAIS VOUS FAIRE AUJOURD'HUI");
 
     //struct dect_mac_phy_handler_tx_params tx_params = {
     //    .handle = 10,
@@ -65,7 +65,7 @@ int main(void)
 
     struct dect_mac_phy_handler_tx_rx_params tx_rx_params = {
         .handle = 30,
-        .tx_usage = NO_HARQ,
+        .tx_usage = HARQ,
         .lbt_enable = false,
         .data = &data,
         .data_size = data_size,
