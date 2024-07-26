@@ -16,7 +16,43 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
 
 int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
 {
-    //TODO: Implement function
+    /* get a harq process */
+    struct dect_mac_harq_process *harq_process = dect_mac_harq_take_process();
+    if(harq_process == NULL){
+        return -1; // TODO: error code of no free harq process
+    }
+
+    /* copy the data to the harq process */
+    uint8_t *data = k_malloc(params.data_len);
+    memcpy(data, params.data, params.data_len);
+
+    /* initialize the harq process */
+    harq_process->data = data;
+    harq_process->data_len = params.data_len;
+    harq_process->receiver_id = params.receiver_id;
+    harq_process->transmission_count = 1; // first transmission
+
+    struct dect_mac_phy_handler_tx_rx_params params = {
+        .handle = HANDLE_HARQ + harq_process->process_number,
+        .tx_usage = HARQ,
+        .lbt_enable = false,
+        .data = harq_process->data,
+        .data_size = harq_process->data_len,
+        .receiver_id = harq_process->receiver_id,
+        .feedback = DECT_MAC_PHY_HANDLER_NO_FEEDBACK,
+        .harq = {
+            .redundancy_version = harq_process->redundancy_version,
+            .new_data_indication = harq_process->new_data_indication,
+            .harq_process_nr = harq_process->process_number,
+            .buffer_size = 0, // TODO: buffer size
+        },
+        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+        .rx_period_ms = CONFIG_HARQ_RX_WAITING_TIME_MS,
+        .start_time = params.start_time,
+    };
+    
+
+    dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&params, PRIORITY_MEDIUM);
 }
 
 void dect_mac_harq_retransmission_work_handler(struct k_work *work)

@@ -4,8 +4,10 @@
 #include <zephyr/kernel.h>
 
 #include "dect_mac_phy_handler_types.h"
+#include "dect_mac_phy_handler.h"
 
 #define HARQ_PROCESS_MAX 8
+#define HANDLE_HARQ 0xA0
 
 /* struct that represent a harq process */
 struct dect_mac_harq_process {

@@ -40,4 +40,19 @@ config HARQ_RX_EXPIRY_TIME_US
 	help
 		A HARQ process soft buffer allocation is released when there have been no receptions to that buffer within the buffer's expiry time.
 
+config HARQ_MAX_TRANSMISSIONS
+	int "HARQ max transmissions"
+	range 1 255
+	default 5
+	help
+		Maximum number of transmissions for a HARQ transmission. If this number is reached, the HARQ transimsson is considered failed.
+		(initial transmission + n retransmission) i.e. 5 means 1 initial transmission and 4 retransmissions.
+
+config HARQ_RX_WAITING_TIME_MS
+	int "HARQ RX waiting time in milliseconds"
+	range 0 10000
+	default 25
+	help
+		Waiting time in ms before consedering the transmission has not reached the target. After this time, a retransmission is triggered.
+
 endmenu

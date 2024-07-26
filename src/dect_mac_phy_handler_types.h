@@ -96,7 +96,7 @@ struct harq_tx_params
 	uint32_t redundancy_version : 2;
 	uint32_t new_data_indication : 1;
 	uint32_t harq_process_nr : 3;
-	uint32_t buffer_size; // buffer size in bytes
+	uint32_t buffer_size : 4; // buffer size in bytes
 };
 
 /* enumerate the different usage of the tx function */
@@ -187,6 +187,13 @@ union dect_mac_phy_handler_params
 };
 
 #define NO_PARAMS (union dect_mac_phy_handler_params*) NULL
+#define DECT_MAC_PHY_HANDLER_NO_FEEDBACK 	\ 	
+	{										\
+		.format = NO_FEEDBACK,				\
+		.info = {							\
+		.raw = 0,							\
+		}									\
+	}
 
 /* Header type 1, due to endianness the order is different than in the specification. */
 struct phy_ctrl_field_common_type1
