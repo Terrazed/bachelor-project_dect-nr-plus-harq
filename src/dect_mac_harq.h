@@ -11,10 +11,10 @@ struct dect_mac_harq_process {
     void* data;
     size_t data_len;
     uint32_t receiver_id;
-    struct k_timer timer;
     uint8_t transmission_count;
     uint8_t redundancy_version;
     uint8_t new_data_indication;
+    struct k_work_delayable retransmission_work;
 };
 
 
@@ -35,6 +35,9 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header);
 
 /* function to transmit a harq message */
 int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params);
+
+/* function that handle the retransmission work */
+void dect_mac_harq_retransmission_work_handler(struct k_work_delayable *work);
 
 /* function to handle the harq retransmission */
 int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process);
