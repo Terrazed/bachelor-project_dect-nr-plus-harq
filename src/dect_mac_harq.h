@@ -5,6 +5,8 @@
 
 #include "dect_mac_phy_handler_types.h"
 
+#define HARQ_PROCESS_MAX 8
+
 /* struct that represent a harq process */
 struct dect_mac_harq_process {
     uint32_t process_number;
@@ -60,6 +62,12 @@ void dect_mac_harq_give_process(struct dect_mac_harq_process *harq_process);
 void dect_mac_harq_init_process(struct dect_mac_harq_process *harq_process, uint32_t process_number);
 
 
+
+/* array of the free harq processes */
+extern bool harq_process_free[HARQ_PROCESS_MAX];
+
+/* array of the harq processes */
+extern struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX];
 
 
 #endif // DECT_MAC_HARQ_H
