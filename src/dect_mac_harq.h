@@ -68,7 +68,7 @@ void dect_mac_harq_initialize();
 extern bool dect_mac_harq_initialized;
 
 /* array of the free harq processes */
-extern bool harq_process_free[HARQ_PROCESS_MAX];
+extern bool harq_process_occupied[HARQ_PROCESS_MAX];
 
 /* array of the harq processes */
 extern struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX];

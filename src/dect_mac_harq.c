@@ -41,8 +41,19 @@ struct dect_mac_harq_process * dect_mac_harq_take_process()
     {
         dect_mac_harq_initialize();
     }
-    
-    //TODO: Implement function
+
+    /* loop through all processes */
+    for(int i = 0; i < HARQ_PROCESS_MAX; i++){
+        if(!harq_process_occupied[i]){ // find a free process
+            harq_process_occupied[i] = true; // set the process as occupied
+            harq_processes[i].new_data_indication = !harq_processes[i].new_data_indication; // toggle the new data indication
+            return &harq_processes[i]; // return the process
+        }
+    }
+
+    LOG_ERR("No free harq process found");
+    return NULL;
+
 }
 
 void dect_mac_harq_give_process(struct dect_mac_harq_process *harq_process)
@@ -53,12 +64,17 @@ void dect_mac_harq_give_process(struct dect_mac_harq_process *harq_process)
         dect_mac_harq_initialize();
     }
 
+    LOG_DBG("Giving back harq process %d", harq_process->process_number);
 
-    //TODO: Implement function
+    dect_mac_harq_init_process(harq_process, harq_process->process_number); // initialize the process
+    harq_process_occupied[harq_process->process_number] = false; // set the process as free
+    k_work_cancel_delayable(&harq_process->retransmission_work); // cancel the retransmission work
 }
 
 void dect_mac_harq_init_process(struct dect_mac_harq_process *harq_process, uint32_t process_number)
 {   
+    LOG_DBG("Initializing harq process %d", process_number);
+
     harq_process->process_number = process_number;
     k_free(harq_process->data); // free the data (if any)
     harq_process->data = NULL;
@@ -82,5 +98,6 @@ void dect_mac_harq_initialize()
             k_work_init_delayable(&harq_processes[i].retransmission_work, dect_mac_harq_retransmission_work_handler); // initialize the retransmission work
         }
         dect_mac_harq_initialized = true; // set the flag to true
+        LOG_DBG("Harq initialized");
     }
 }
