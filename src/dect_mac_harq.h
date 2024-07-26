@@ -61,7 +61,11 @@ void dect_mac_harq_give_process(struct dect_mac_harq_process *harq_process);
 /* function to init a harq process */
 void dect_mac_harq_init_process(struct dect_mac_harq_process *harq_process, uint32_t process_number);
 
+/* function to init all the file */
+void dect_mac_harq_initialize();
 
+/* class initialisation flag */
+extern bool dect_mac_harq_initialized;
 
 /* array of the free harq processes */
 extern bool harq_process_free[HARQ_PROCESS_MAX];
