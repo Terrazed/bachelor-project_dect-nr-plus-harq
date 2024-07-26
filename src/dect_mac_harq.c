@@ -31,7 +31,26 @@ int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process)
 
 void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *harq_process)
 {
-    //TODO: Implement function
+    /* increment the redundancy version */
+    /* increment pattern: 0 -> 2 -> 3 -> 1 -> 0 -> ... */
+
+    switch (harq_process->redundancy_version){
+        case 0:
+            harq_process->redundancy_version = 2;
+            break;
+        case 1:
+            harq_process->redundancy_version = 0;
+            break;
+        case 2:
+            harq_process->redundancy_version = 3;
+            break;
+        case 3:
+            harq_process->redundancy_version = 1;
+            break;
+        default:
+            LOG_ERR("Invalid redundancy version");
+            break;
+    }
 }
 
 struct dect_mac_harq_process * dect_mac_harq_take_process()
