@@ -36,11 +36,24 @@ void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *ha
 
 struct dect_mac_harq_process * dect_mac_harq_take_process()
 {
+    /* initialize if not already initialized */
+    if(dect_mac_harq_initialized == false)
+    {
+        dect_mac_harq_initialize();
+    }
+    
     //TODO: Implement function
 }
 
 void dect_mac_harq_give_process(struct dect_mac_harq_process *harq_process)
 {
+    /* initialize if not already initialized */
+    if(dect_mac_harq_initialized == false)
+    {
+        dect_mac_harq_initialize();
+    }
+
+
     //TODO: Implement function
 }
 
