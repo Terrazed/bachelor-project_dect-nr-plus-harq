@@ -1,5 +1,8 @@
 #include "dect_mac_harq.h"
 
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(harq, 4);
+
 bool harq_process_occupied[HARQ_PROCESS_MAX] = {0};
 struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX] = {0};
 bool dect_mac_harq_initialized = false;
