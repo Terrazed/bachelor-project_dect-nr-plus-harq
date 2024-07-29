@@ -44,6 +44,18 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     {
         // switch from tx to rx
         current_state = RECEIVING;
+
+        if((handle & 0x07FFFFF0) == HANDLE_HARQ)
+        {
+            // get harq process
+            uint8_t harq_porcess_number = handle & 0x0000000F;
+            struct k_work_delayable *work = &harq_processes[harq_porcess_number].retransmission_work;
+
+            // schedule retransmission work
+            k_work_schedule(work, K_MSEC(CONFIG_HARQ_RX_WAITING_TIME_MS));
+        }
+        
+
     }
     else
     {
