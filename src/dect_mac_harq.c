@@ -9,8 +9,24 @@ bool dect_mac_harq_initialized = false;
 
 int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t start_time)
 {
-    //TODO: Implement function
-    return 0;
+    /* config the operation */
+    struct dect_mac_phy_handler_tx_harq_params params = {
+        .handle = HANDLE_HARQ + header->df_harq_process_nr,
+        .lbt_enable = false,
+        .data = NULL,
+        .data_size = 0,
+        .receiver_id = header->transmitter_id_hi << 8 | header->transmitter_id_lo,
+        .harq = {
+            .redundancy_version = 0,
+            .new_data_indication = 1,
+            .harq_process_nr = header->df_harq_process_nr,
+            .buffer_size = 0, // TODO: buffer size
+        },
+        .start_time = start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
+    };
+
+    /* send the acknoledgement */
+    dect_mac_phy_handler_tx_harq(params);
 }
 
 void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
