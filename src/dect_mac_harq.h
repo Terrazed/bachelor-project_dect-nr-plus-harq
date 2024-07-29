@@ -8,6 +8,8 @@
 
 #define HARQ_PROCESS_MAX 8
 #define HANDLE_HARQ 0xA0
+#define ACK 1
+#define NACK 0
 
 /* struct that represent a harq process */
 struct dect_mac_harq_process {

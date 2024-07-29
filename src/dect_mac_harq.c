@@ -12,7 +12,27 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
 
 void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
 {
-    //TODO: Implement function
+    /* get the feedback info */
+    union feedback_info feedback;
+    feedback.byte.hi = header->feedback_info_hi;
+    feedback.byte.lo = header->feedback_info_lo;
+
+    /* get the harq process */
+    struct dect_mac_harq_process *harq_process = &harq_processes[feedback.format_1.harq_process_number];
+
+    /* stop the scheduled work */
+    k_work_cancel_delayable(&harq_process->retransmission_work);
+
+    /* check if the transmission was successful */
+    if(feedback.format_1.transmission_feedback == ACK){
+        LOG_INF("ACK received for harq process %d", feedback.format_1.harq_process_number);
+        dect_mac_harq_give_process(harq_process);
+    } else {
+        LOG_WRN("NACK received for harq process %d", feedback.format_1.harq_process_number);
+        dect_mac_harq_increment_redundancy_version(harq_process);
+        k_work_schedule(&harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
+    }
+
 }
 
 int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
