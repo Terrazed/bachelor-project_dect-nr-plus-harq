@@ -21,7 +21,7 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
     struct dect_mac_harq_process *harq_process = &harq_processes[feedback.format_1.harq_process_number];
 
     /* stop the scheduled work */
-    k_work_cancel_delayable(&harq_process->retransmission_work);
+    k_work_cancel_delayable(&harq_process->retransmission_work); // this is async so if the work has already started it will not be stopped
 
     /* check if the transmission was successful */
     if(feedback.format_1.transmission_feedback == ACK){
@@ -32,7 +32,6 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
         dect_mac_harq_increment_redundancy_version(harq_process);
         k_work_schedule(&harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
     }
-
 }
 
 int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
@@ -79,7 +78,21 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
 
 void dect_mac_harq_retransmission_work_handler(struct k_work *work)
 {
-    //TODO: Implement function
+    /* find the calling harq process */
+    struct dect_mac_harq_process *harq_process = CONTAINER_OF((struct k_work_delayable*)work, struct dect_mac_harq_process, retransmission_work);
+
+    /* check if the transmission count is less than the maximum */
+    if(harq_process->transmission_count <= CONFIG_HARQ_MAX_TRANSMISSIONS)
+    {
+        LOG_INF("Retransmitting harq process %d", harq_process->process_number);
+        dect_mac_harq_retransmit(harq_process);
+    }
+    else
+    {
+        LOG_WRN("Max retransmissions reached for harq process %d", harq_process->process_number);
+        dect_mac_harq_give_process(harq_process);
+    }
+        
 }
 
 int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process)
