@@ -8,6 +8,7 @@
         "dect_mac_phy_handler_types.h": "c",
         "dect_mac_phy_handler_cb.h": "c",
         "hwinfo.h": "c",
-        "dect_mac_harq.h": "c"
+        "dect_mac_harq.h": "c",
+        "dk_buttons_and_leds.h": "c"
     }
 }
