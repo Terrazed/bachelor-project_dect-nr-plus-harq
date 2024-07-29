@@ -97,8 +97,29 @@ void dect_mac_harq_retransmission_work_handler(struct k_work *work)
 
 int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process)
 {
-    //TODO: Implement function
-    return 0;
+    harq_process->transmission_count++; // incremenrt transmission
+
+    /* config tx-rx operation */
+    struct dect_mac_phy_handler_tx_rx_params tx_rx_params = {
+        .handle = HANDLE_HARQ + harq_process->process_number,
+        .tx_usage = HARQ,
+        .lbt_enable = false,
+        .data = harq_process->data,
+        .data_size = harq_process->data_len,
+        .receiver_id = harq_process->receiver_id,
+        .feedback = DECT_MAC_PHY_HANDLER_NO_FEEDBACK,
+        .harq = {
+            .redundancy_version = harq_process->redundancy_version,
+            .new_data_indication = harq_process->new_data_indication,
+            .harq_process_nr = harq_process->process_number,
+            .buffer_size = 0, // TODO: buffer size
+        },
+        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+        .rx_period_ms = CONFIG_HARQ_RX_WAITING_TIME_MS,
+        .start_time = 0,
+    };
+
+    return dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&tx_rx_params, PRIORITY_MEDIUM);
 }
 
 void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *harq_process)
