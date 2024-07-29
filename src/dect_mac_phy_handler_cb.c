@@ -89,44 +89,56 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 {
     LOG_DBG("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
 
-
-    if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 0) && (status->phy_type == 1))
+    if(status->phy_type == HEADER_TYPE_2)
     {
-        /* send a harq feedback */
-        struct dect_mac_phy_handler_tx_harq_params harq = {
-            .handle =  10 | (1<<27),
-            .lbt_enable = false,
-            .data = 0,
-            .data_size = 0,
-            .receiver_id = ((struct phy_ctrl_field_common_type2*)hdr->type_2)->transmitter_id_hi<<8 | ((struct phy_ctrl_field_common_type2*)hdr->type_2)->transmitter_id_lo,
-            .harq = {
-                .redundancy_version = 0,
-                .new_data_indication = 1,
-                .harq_process_nr = 1,
-                .buffer_size = 0xf,
-            },
-            .start_time = status->stf_start_time + (3 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
-        };
-        //LOG_INF("request HARQ feedback");
-        dect_mac_phy_handler_tx_harq(harq);
-        dect_phy_queue_put(PLACEHOLDER, NO_PARAMS, PRIORITY_CRITICAL);
-        //LOG_INF("HARQ feedback requested");
+        LOG_DBG("Received PCC with header type 2");
 
+        struct phy_ctrl_field_common_type2 *header = (struct phy_ctrl_field_common_type2 *)hdr;
 
+        if(header->header_format == HEADER_FORMAT_000) // requesting HARQ response
+        {
+            if(header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
+				&& ((header->receiver_id_hi == (device_id >> 8) && header->receiver_id_lo == (device_id & 0xff)) // correct receiver ID (this device)
+				|| (header->receiver_id_hi == 0xff && header->receiver_id_lo == 0xff))) // correct receiver ID (broadcast) TODO: does this makes sense ?
+            { 
+                LOG_DBG("reveiving HARQ request, rv: %d", header->df_red_version);
+
+				int err = dect_mac_harq_request(header, status->stf_start_time);
+				if(err){
+					LOG_ERR("Transmit HARQ failed");
+				}
+            } 
+            else
+            {
+                LOG_WRN("Received HARQ request with wrong receiver ID");
+            }
+        }
+        else if (header->header_format == HEADER_FORMAT_001)
+        {
+            if(header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
+                && ((header->transmitter_id_hi == (device_id >> 8) && header->transmitter_id_lo == (device_id & 0xff)) // correct transmitter ID (this device)
+                || (header->transmitter_id_hi == 0xff && header->transmitter_id_lo == 0xff))) // correct transmitter ID (broadcast)
+            {
+                if(header->feedback_format == FEEDBACK_FORMAT_1) // receiving HARQ response
+                {
+                    LOG_DBG("reveiving HARQ response");
+                    dect_mac_harq_response(header);
+                }
+            }
+        }
+        else
+        {
+            LOG_ERR("Received PCC with unknown header format");
+        }
     }
-
-    if((((struct phy_ctrl_field_common_type2*)hdr->type_2)->header_format == 1) && (status->phy_type == 1))
+    else if(status->phy_type == HEADER_TYPE_1)
     {
-        /* print acknowlegement */
-        union feedback_info feedback;
-        feedback.byte.hi = ((struct phy_ctrl_field_common_type2*)hdr->type_2)->feedback_info_hi;
-        feedback.byte.lo = ((struct phy_ctrl_field_common_type2*)hdr->type_2)->feedback_info_lo;
-        LOG_INF("ACK/NACK: %d", feedback.format_1.transmission_feedback);
+        LOG_DBG("Received PCC with header type 1");
     }
-
-    
-    
-
+    else
+    {
+        LOG_ERR("Received PCC with unknown header type");
+    }
 }
 
 void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_crc_failure *crc_failure)
