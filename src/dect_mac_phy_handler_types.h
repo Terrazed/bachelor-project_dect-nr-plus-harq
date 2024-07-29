@@ -173,7 +173,7 @@ struct dect_mac_phy_handler_rssi_params
 
 struct dect_mac_phy_handler_rx_stop_params
 {
-	uint32_t handle : 28;
+	uint32_t handle;
 };
 
 union dect_mac_phy_handler_params

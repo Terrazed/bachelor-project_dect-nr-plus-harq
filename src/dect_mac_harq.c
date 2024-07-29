@@ -63,6 +63,11 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
 
     /* copy the data to the harq process */
     uint8_t *data = k_malloc(params.data_len);
+    if(data == NULL){
+        dect_mac_harq_give_process(harq_process);
+        LOG_ERR("No memory for harq data");
+        return -1; // TODO: error code of no memory
+    }
     memcpy(data, params.data, params.data_len);
 
     /* initialize the harq process */
@@ -91,7 +96,7 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
     };
     
 
-    return dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&tx_rx_params, PRIORITY_MEDIUM);
+    return dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&tx_rx_params, PRIORITY_HIGH);
     
 }
 
