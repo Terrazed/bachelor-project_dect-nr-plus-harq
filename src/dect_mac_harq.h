@@ -41,7 +41,7 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header);
 int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params);
 
 /* function that handle the retransmission work */
-void dect_mac_harq_retransmission_work_handler(struct k_work_delayable *work);
+void dect_mac_harq_retransmission_work_handler(struct k_work *work);
 
 /* function to handle the harq retransmission */
 int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process);
