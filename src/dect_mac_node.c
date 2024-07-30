@@ -1,6 +1,10 @@
 
 #include "dect_mac_node.h"
 
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/hwinfo.h>
+LOG_MODULE_REGISTER(node, 3);
+
 struct sys_hashmap node_hashmap;
 struct k_mutex node_mutex;
 
