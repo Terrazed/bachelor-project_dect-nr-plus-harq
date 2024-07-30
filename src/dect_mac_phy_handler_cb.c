@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb,4);
+LOG_MODULE_REGISTER(handler_cb,3);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -119,7 +119,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
         else if (header->header_format == HEADER_FORMAT_001)
         {
             if(header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
-                && ((header->receiver_id_hi == (device_id >> 8) && header->receiver_id_hi == (device_id & 0xff)) // correct transmitter ID (this device)
+                && ((header->receiver_id_hi == (device_id >> 8) && header->receiver_id_lo == (device_id & 0xff)) // correct transmitter ID (this device)
                 || (header->receiver_id_hi == 0xff && header->receiver_id_hi == 0xff))) // correct transmitter ID (broadcast)
             {
                 LOG_DBG("feedback format : %d", header->feedback_format);
@@ -131,7 +131,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
             }
             else
             {
-                LOG_WRN("Received message with wrong receiver ID");
+                LOG_WRN("Received message with wrong receiver ID, received: %d, expected: %d", header->receiver_id_hi << 8 | header->receiver_id_lo, device_id);
             }
         }
         else

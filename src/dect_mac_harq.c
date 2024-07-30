@@ -1,7 +1,7 @@
 #include "dect_mac_harq.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(harq, 4);
+LOG_MODULE_REGISTER(harq, 3);
 
 bool harq_process_occupied[HARQ_PROCESS_MAX] = {0};
 struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX] = {0};
@@ -16,13 +16,10 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
         .data = NULL,
         .data_size = 0,
         .receiver_id = header->transmitter_id_hi << 8 | header->transmitter_id_lo,
-        .harq = {
-            .redundancy_version = 0,
-            .new_data_indication = 1,
-            .harq_process_nr = header->df_harq_process_nr,
-            .buffer_size = 0, // TODO: buffer size
-        },
-        .start_time = start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
+        .buffer_status = 0xf, // TODO: buffer status
+        .channel_quality_indicator = 2, // TODO: channel quality indicator
+        .harq_process_number = header->df_harq_process_nr,
+        .start_time = start_time + (3 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
     };
 
     /* send the acknoledgement */
@@ -105,7 +102,7 @@ void dect_mac_harq_retransmission_work_handler(struct k_work *work)
     struct dect_mac_harq_process *harq_process = CONTAINER_OF((struct k_work_delayable*)work, struct dect_mac_harq_process, retransmission_work);
 
     /* check if the transmission count is less than the maximum */
-    if(harq_process->transmission_count <= CONFIG_HARQ_MAX_TRANSMISSIONS)
+    if(harq_process->transmission_count < CONFIG_HARQ_MAX_TRANSMISSIONS)
     {
         LOG_INF("Retransmitting harq process %d", harq_process->process_number);
         dect_mac_harq_retransmit(harq_process);

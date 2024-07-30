@@ -144,7 +144,9 @@ struct dect_mac_phy_handler_tx_harq_params
 	uint8_t *data;
 	size_t data_size;
 	uint32_t receiver_id;
-	struct harq_tx_params harq;
+	uint32_t buffer_status : 4;
+	uint32_t channel_quality_indicator : 4;
+	uint32_t harq_process_number : 3;
 	uint64_t start_time;
 };
 
@@ -191,8 +193,15 @@ union dect_mac_phy_handler_params
 	{										\
 		.format = NO_FEEDBACK,				\
 		.info = {							\
-		.raw = 0,							\
+			.raw = 0,						\
 		}									\
+	}
+#define DECT_MAC_PHY_HANDLER_NO_HARQ 	\
+	{									\
+		.redundancy_version = 0,		\
+		.new_data_indication = 0,		\
+		.harq_process_nr = 0,			\
+		.buffer_size = 0,				\
 	}
 
 /* Header type 1, due to endianness the order is different than in the specification. */
