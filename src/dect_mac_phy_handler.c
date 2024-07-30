@@ -160,25 +160,19 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
             .format = FEEDBACK_FORMAT_1,
             .info = {
                 .format_1 = {
-                    .channel_quality_indicator = 2, // TODO PUT TRUE VALUE
-                    .transmission_feedback = 0,
-                    .harq_process_number = 0, // TODO PUT TRUE VALUE
-                    .buffer_status = 0,       // TODO PUT TRUE VALUE
+                    .channel_quality_indicator = params.channel_quality_indicator,
+                    .transmission_feedback = 0, // NACK but if PDC CRC correct will be put to ACK by the PHY layer
+                    .harq_process_number = params.harq_process_number,
+                    .buffer_status = params.buffer_status,
                 },
             },
         },
-        .harq = {
-            .redundancy_version = params.harq.redundancy_version,
-            .new_data_indication = params.harq.new_data_indication,
-            .harq_process_nr = params.harq.harq_process_nr,
-            .buffer_size = params.harq.buffer_size,
-        },
+        .harq = DECT_MAC_PHY_HANDLER_NO_HARQ,
         .start_time = params.start_time,
     };
 
     /* create true params */
     DECT_MAC_PHY_HANDLER_TRUE_TX_PARAM_CREATE(true_params, tx_params);
-
 
     /* setting the handle back to the good handle */
     true_params.handle = ((TX_HARQ << 28) | (params.handle & 0x0fffffff));
@@ -302,7 +296,6 @@ void dect_mac_phy_handler_time_get()
 
 void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params)
 {
-
     /* set the time */
     output_params->start_time = input_params->start_time;
 
@@ -319,7 +312,7 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     /* set the carrier */
     output_params->carrier = CONFIG_CARRIER;
 
-    uint32_t tx_power = 11; // TODO: create a function to calculate these
+    uint32_t tx_power = 4; // TODO: create a function to calculate these
     uint32_t df_mcs = 2;
 
     uint32_t packet_length_type = 0; // TODO: create a function to calculate these
@@ -403,5 +396,5 @@ void dect_mac_phy_handler_rx_config(struct dect_mac_phy_handler_rx_params *input
     output_params->duration = input_params->rx_period_ms * 69120;
     output_params->filter.short_network_id = CONFIG_NETWORK_ID;
     output_params->filter.is_short_network_id_used = true;
-    output_params->filter.receiver_identity = input_params->receiver_identity;
+    output_params->filter.receiver_identity = 0;//input_params->receiver_identity;
 }

@@ -10,7 +10,7 @@ K_MUTEX_DEFINE(queue_mutex);
 K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_handler_queue_timer_callback, NULL);
 K_THREAD_STACK_DEFINE(dect_mac_phy_handler_queue_work_queue_stack, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE);
 
-sys_slist_t dect_mac_phy_handler_queue;
+sys_slist_t dect_mac_phy_handler_queue = SYS_SLIST_STATIC_INIT(&dect_mac_phy_handler_queue);
 struct dect_mac_phy_handler_queue_item current_item = {0};
 uint32_t dect_mac_phy_handler_queue_operation_failed_counter = 0;
 struct k_work_q dect_mac_phy_handler_queue_work_queue;
@@ -42,9 +42,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     dect_mac_phy_handler_queue_work->priority = priority;
 
     /* submit the work */
-    k_work_submit(&dect_mac_phy_handler_queue_work->work);
-
-    
+    k_work_submit_to_queue(&dect_mac_phy_handler_queue_work_queue ,&dect_mac_phy_handler_queue_work->work);
 
     return 0;
 }
@@ -57,8 +55,7 @@ void dect_mac_phy_queue_work_handler(struct k_work *work)
     union dect_mac_phy_handler_params params = work_context->params;
     uint32_t priority = work_context->priority;
 
-    /* free the work */
-    k_free(work_context); // TODO: use memory pool instead of free
+    
 
     LOG_DBG("Adding item to the queue - function: %d, priority: %u", function, priority);
 
@@ -126,6 +123,10 @@ void dect_mac_phy_queue_work_handler(struct k_work *work)
 
     /* notify the thread that there is an item in the queue */
     k_sem_give(&queue_item_sem);
+
+    /* free the work */
+    /* WARNING, THIS SHOULD NOT BE DONE IN THE HANDLER BECAUSE THE WORK WILL BE UPDATED AFTER BEING DONE WITH THE HANDLE SO IT UPDATES A PLACE IN THE MEMORY THAT IS FREED */
+    k_free(work_context); // TODO: use memory pool instead of free
 }
 
 int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
@@ -191,7 +192,7 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
             LOG_ERR("Unknown function: %d", function);
             return -1; // TODO: return a proper error code
     }
-
+    return 0;
 }
 
 void dect_mac_phy_queue_thread()
@@ -200,7 +201,7 @@ void dect_mac_phy_queue_thread()
     LOG_DBG("Starting the queue thread");
 
     k_work_queue_init(&dect_mac_phy_handler_queue_work_queue);
-    k_work_queue_start(&dect_mac_phy_handler_queue_work_queue, dect_mac_phy_handler_queue_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_phy_handler_queue_work_queue_stack), 10, NULL);
+    k_work_queue_start(&dect_mac_phy_handler_queue_work_queue, dect_mac_phy_handler_queue_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_phy_handler_queue_work_queue_stack), 9, NULL);
 
     while (1)
     {
@@ -212,7 +213,6 @@ void dect_mac_phy_queue_thread()
 
         /* wait for a new item in the queue */
         k_sem_take(&queue_item_sem, K_FOREVER);
-
         LOG_DBG("Got a new item in the queue");
 
         struct dect_mac_phy_handler_queue_item local_item;
@@ -245,6 +245,7 @@ void dect_mac_phy_queue_thread()
         /* reset fail counter and execute the function */
         LOG_DBG("Executing the function");
         dect_mac_phy_handler_queue_operation_failed_counter = 0;
+
         dect_mac_phy_queue_function_execute(local_item.function, &local_item.params);
     }
 }

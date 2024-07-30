@@ -8,7 +8,7 @@
 #include "dect_mac_phy_handler.h"
 
 /* stack size in bytes of the thread that reads the list */
-#define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 1024
+#define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 2048
 
 /* maximum number of item that the queue can contains */
 #define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 32
