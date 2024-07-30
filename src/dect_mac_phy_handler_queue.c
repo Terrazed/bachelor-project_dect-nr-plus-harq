@@ -42,7 +42,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     dect_mac_phy_handler_queue_work->priority = priority;
 
     /* submit the work */
-    k_work_submit(&dect_mac_phy_handler_queue_work->work);
+    k_work_submit_to_queue(&dect_mac_phy_handler_queue_work_queue ,&dect_mac_phy_handler_queue_work->work);
 
     return 0;
 }
@@ -201,7 +201,7 @@ void dect_mac_phy_queue_thread()
     LOG_DBG("Starting the queue thread");
 
     k_work_queue_init(&dect_mac_phy_handler_queue_work_queue);
-    k_work_queue_start(&dect_mac_phy_handler_queue_work_queue, dect_mac_phy_handler_queue_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_phy_handler_queue_work_queue_stack), 10, NULL);
+    k_work_queue_start(&dect_mac_phy_handler_queue_work_queue, dect_mac_phy_handler_queue_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_phy_handler_queue_work_queue_stack), 9, NULL);
 
     while (1)
     {

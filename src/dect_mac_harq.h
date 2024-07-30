@@ -6,6 +6,8 @@
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler.h"
 
+#define DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE 1024
+
 #define HARQ_PROCESS_MAX 8
 #define HANDLE_HARQ 0xA0
 #define ACK 1
@@ -76,6 +78,9 @@ extern bool harq_process_occupied[HARQ_PROCESS_MAX];
 
 /* array of the harq processes */
 extern struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX];
+
+/* work queue that is used to schedule the execution of a retransmission */
+extern struct k_work_q dect_mac_harq_work_queue;
 
 
 #endif // DECT_MAC_HARQ_H

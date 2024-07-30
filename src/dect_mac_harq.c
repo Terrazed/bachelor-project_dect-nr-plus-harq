@@ -1,11 +1,14 @@
 #include "dect_mac_harq.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(harq, 3);
+LOG_MODULE_REGISTER(harq, 4);
+
+K_THREAD_STACK_DEFINE(dect_mac_harq_work_queue_stack, DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE);
 
 bool harq_process_occupied[HARQ_PROCESS_MAX] = {0};
 struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX] = {0};
 bool dect_mac_harq_initialized = false;
+struct k_work_q dect_mac_harq_work_queue;
 
 int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t start_time)
 {
@@ -36,17 +39,18 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
     /* get the harq process */
     struct dect_mac_harq_process *harq_process = &harq_processes[feedback.format_1.harq_process_number];
 
-    /* stop the scheduled work */
-    k_work_cancel_delayable(&harq_process->retransmission_work); // this is async so if the work has already started it will not be stopped
+    
 
     /* check if the transmission was successful */
     if(feedback.format_1.transmission_feedback == ACK){
         LOG_INF("ACK received for harq process %d", feedback.format_1.harq_process_number);
+        k_work_cancel_delayable(&harq_process->retransmission_work); // stop the scheduled work 
         dect_mac_harq_give_process(harq_process);
     } else {
         LOG_WRN("NACK received for harq process %d", feedback.format_1.harq_process_number);
         dect_mac_harq_increment_redundancy_version(harq_process);
-        k_work_schedule(&harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
+        int ret = k_work_reschedule_for_queue(&dect_mac_harq_work_queue, &harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
+        LOG_WRN("Rescheduling retransmission work returned %d", ret);
     }
 }
 
@@ -221,6 +225,10 @@ void dect_mac_harq_initialize()
     /* initialize only once */
     if(dect_mac_harq_initialized == false)
     {
+
+        k_work_queue_init(&dect_mac_harq_work_queue);
+        k_work_queue_start(&dect_mac_harq_work_queue, dect_mac_harq_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_harq_work_queue_stack), 8, NULL);
+
         /* loop through all processes */
         for (int i = 0; i < HARQ_PROCESS_MAX; i++)
         {

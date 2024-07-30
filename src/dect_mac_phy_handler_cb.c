@@ -52,7 +52,7 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
             struct k_work_delayable *work = &harq_processes[harq_porcess_number].retransmission_work;
 
             // schedule retransmission work
-            k_work_schedule(work, K_MSEC(CONFIG_HARQ_RX_WAITING_TIME_MS));
+            k_work_schedule_for_queue(&dect_mac_harq_work_queue, work, K_MSEC(CONFIG_HARQ_RX_WAITING_TIME_MS));
         }
     }
     else
