@@ -95,7 +95,6 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
         .start_time = params.start_time,
     };
     
-
     return dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&tx_rx_params, PRIORITY_HIGH);
     
 }

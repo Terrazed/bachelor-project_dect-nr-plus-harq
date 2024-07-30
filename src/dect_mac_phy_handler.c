@@ -302,7 +302,6 @@ void dect_mac_phy_handler_time_get()
 
 void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params)
 {
-
     /* set the time */
     output_params->start_time = input_params->start_time;
 
