@@ -1,7 +1,7 @@
 #include "dect_mac_harq.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(harq, 4);
+LOG_MODULE_REGISTER(harq, 3);
 
 K_THREAD_STACK_DEFINE(dect_mac_harq_work_queue_stack, DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE);
 
@@ -96,6 +96,7 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
         .start_time = params.start_time,
     };
     
+    LOG_INF("Transmitting... (harq process: %d, count: %d, rv: %d)", harq_process->process_number, harq_process->transmission_count, harq_process->redundancy_version);
     return dect_phy_queue_put(TX_RX, (union dect_mac_phy_handler_params*)&tx_rx_params, PRIORITY_HIGH);
     
 }
@@ -108,7 +109,6 @@ void dect_mac_harq_retransmission_work_handler(struct k_work *work)
     /* check if the transmission count is less than the maximum */
     if(harq_process->transmission_count < CONFIG_HARQ_MAX_TRANSMISSIONS)
     {
-        LOG_INF("Retransmitting harq process %d", harq_process->process_number);
         dect_mac_harq_retransmit(harq_process);
     }
     else
@@ -122,6 +122,7 @@ void dect_mac_harq_retransmission_work_handler(struct k_work *work)
 int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process)
 {
     harq_process->transmission_count++; // incremenrt transmission
+    LOG_INF("Transmitting... (harq process: %d, count: %d, rv: %d)", harq_process->process_number, harq_process->transmission_count, harq_process->redundancy_version);
 
     /* config tx-rx operation */
     struct dect_mac_phy_handler_tx_rx_params tx_rx_params = {
