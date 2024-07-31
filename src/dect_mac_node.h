@@ -4,6 +4,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/hash_map.h>
 
+#include "dect_mac_phy_handler.h"
+
 /* define the minimum time that a node will kept if not used 
 (the node will be deleted after two cycle so it can 
 take up to double the time with a average at 1.5 times the time) */
