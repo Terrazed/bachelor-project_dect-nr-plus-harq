@@ -12,7 +12,7 @@ static uint64_t dect_app_ztime_now_in_mdm_ticks(void)
 {
 	uint64_t time_now_ns = k_ticks_to_ns_floor64(sys_clock_tick_get());
 
-	return time_now_ns / 1000 * 69120 / 1000;
+	return time_now_ns / 1000 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000;
 }
 
 /* Current time in modem ticks */
