@@ -5,6 +5,7 @@
 
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler.h"
+#include "dect_mac_node.h"
 
 #define DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE 1024
 
