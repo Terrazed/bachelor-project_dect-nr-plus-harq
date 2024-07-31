@@ -6,13 +6,14 @@
 
 #include "dect_mac_phy_handler.h"
 
-/* define the minimum time that a node will kept if not used 
-(the node will be deleted after two cycle so it can 
+/* define the minimum time that a node will kept if not used
+(the node will be deleted after two cycle so it can
 take up to double the time with a average at 1.5 times the time) */
 #define DECT_MAC_NODE_DELETE_TIMEOUT K_MINUTES(10)
 
 /* struct that represent a node */
-struct node{
+struct node
+{
     uint32_t address;
     bool used;
     uint8_t tx_power;
@@ -20,19 +21,14 @@ struct node{
     uint32_t buffer_size;
 };
 
-
-
 /* hashmap that contains all the nodes, the keys are the nodes addresses */
 extern struct sys_hashmap node_hashmap;
 
 /* mutex to protect the node_hashmap */
 extern struct k_mutex node_mutex;
 
-
 /* thread that handle the deletion of the not used nodes */
 void dect_mac_node_thread();
-
-
 
 /* function that cleans all the nodes not used in the past #DECT_MAC_NODE_DELETE_TIMEOUT */
 void dect_mac_node_clean_unused_nodes();
