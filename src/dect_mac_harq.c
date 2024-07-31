@@ -20,7 +20,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
         .data_size = 0,
         .receiver_id = header->transmitter_id_hi << 8 | header->transmitter_id_lo,
         .buffer_status = 0xf, // TODO: buffer status
-        .channel_quality_indicator = 2, // TODO: channel quality indicator
+        .channel_quality_indicator = dect_mac_node_get_cqi(header->transmitter_id_hi << 8 | header->transmitter_id_lo),
         .harq_process_number = header->df_harq_process_nr,
         .start_time = start_time + (3 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
     };
@@ -122,6 +122,10 @@ void dect_mac_harq_retransmission_work_handler(struct k_work *work)
 int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process)
 {
     harq_process->transmission_count++; // incremenrt transmission
+    
+    dect_mac_node_add_power(harq_process->receiver_id, harq_process->transmission_count); // add power to the receiver
+    dect_mac_node_reduce_mcs(harq_process->receiver_id, 1); // reduce the MCS of the receiver
+
     LOG_INF("Transmitting... (harq process: %d, count: %d, rv: %d)", harq_process->process_number, harq_process->transmission_count, harq_process->redundancy_version);
 
     /* config tx-rx operation */
