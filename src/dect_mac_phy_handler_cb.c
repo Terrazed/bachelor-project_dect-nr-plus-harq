@@ -10,6 +10,9 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
 {
     LOG_DBG("init callback - time: %llu, temp: %d, err: %d", *time, temp, err);
 
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
+
     if (err)
     {
         LOG_ERR("init callback - error: %d", err);
@@ -23,6 +26,9 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
 void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
 {
     LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     if (err)
     {
@@ -70,6 +76,9 @@ void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_
 {
     LOG_DBG("rssi callback - time: %llu", *time);
 
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
+
     /* release the semaphore */
     k_sem_give(&phy_layer_sem);
 }
@@ -77,6 +86,9 @@ void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_
 void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, uint32_t handle)
 {
     LOG_DBG("rx stop callback - time: %llu, err: %d, handle: %x", *time, err, handle);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     if (err)
     {
@@ -88,6 +100,9 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
 void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr)
 {
     LOG_DBG("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     /* optimize node */
     uint32_t transmitter_id = ((struct phy_ctrl_field_common_type1*)hdr)->transmitter_id_hi << 8 | ((struct phy_ctrl_field_common_type1*)hdr)->transmitter_id_lo;
@@ -161,16 +176,22 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_crc_failure *crc_failure)
 {
     LOG_ERR("pcc crc error callback - time: %llu", *time);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 }
 
 void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_status *status, const void *data, uint32_t len)
 {
+
     /* saving the data locally to ensure data validity */
     uint8_t data_local[len];
     memcpy(data_local, data, len);
-
-
+    
     LOG_DBG("pdc callback - time: %llu", *time);
+    
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     if(len > 0)
     {
@@ -187,11 +208,17 @@ void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 void dect_mac_phy_pdc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_crc_failure *crc_failure)
 {
     LOG_ERR("pdc crc error callback - time: %llu", *time);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 }
 
 void dect_mac_phy_link_config_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
 {
     LOG_DBG("link config callback - time: %llu, err: %d", *time, err);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     if (err)
     {
@@ -207,6 +234,9 @@ void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err 
 {
     LOG_DBG("time get callback - time: %llu, err: %d", *time, err);
 
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
+
     if (err)
     {
         LOG_ERR("time get callback - error: %d", err);
@@ -220,6 +250,9 @@ void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err 
 void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_capability *capability)
 {
     LOG_DBG("capability get callback - time: %llu, err: %d", *time, err);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     if (err)
     {
@@ -247,6 +280,9 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
 void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
 {
     LOG_DBG("deinit callback - time: %llu, err: %d", *time, err);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(time);
 
     if (err)
     {
