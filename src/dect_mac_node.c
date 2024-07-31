@@ -67,10 +67,10 @@ void dect_mac_node_clean_unused_nodes(){
     }
 }
 
-int dect_mac_node_get_tx_power(uint32_t address){
+uint8_t dect_mac_node_get_tx_power(uint32_t address){
     uint64_t node_addr;
     struct node *node_ptr;
-    uint32_t result;
+    uint8_t result;
 
     bool should_create_node = false;
 
@@ -99,10 +99,10 @@ int dect_mac_node_get_tx_power(uint32_t address){
     return result;
 }
 
-int dect_mac_node_get_mcs(uint32_t address){
+int8_t dect_mac_node_get_mcs(uint32_t address){
     uint64_t node_addr;
     struct node *node_ptr;
-    uint32_t result;
+    int8_t result;
 
     bool should_create_node = false;
 
@@ -131,11 +131,11 @@ int dect_mac_node_get_mcs(uint32_t address){
     return result;
 }
 
-int dect_mac_node_get_cqi(uint32_t address)
+uint8_t dect_mac_node_get_cqi(uint32_t address)
 {
     uint64_t node_addr;
     struct node *node_ptr;
-    int result;
+    uint8_t result;
 
     bool should_create_node = false;
 
@@ -169,7 +169,7 @@ int dect_mac_node_get_cqi(uint32_t address)
 
 }
 
-int dect_mac_node_create_node(uint32_t address, uint32_t tx_power, uint32_t mcs){
+int dect_mac_node_create_node(uint32_t address, uint8_t tx_power, int8_t mcs){
 
     struct node *node_ptr;
     node_ptr = (struct node *)k_malloc(sizeof(struct node));
@@ -180,7 +180,7 @@ int dect_mac_node_create_node(uint32_t address, uint32_t tx_power, uint32_t mcs)
     node_ptr->mcs = mcs;
     node_ptr->used = false;
 
-    bool result = false;
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
@@ -188,22 +188,23 @@ int dect_mac_node_create_node(uint32_t address, uint32_t tx_power, uint32_t mcs)
         switch(ret){
             case 0:
                 LOG_WRN("node already exists, overwriting");
-                result = true;
+                result = 0;
                 break;
             case 1:
                 LOG_DBG("node created : %d", address);
-                result = true;
+                result = 0;
                 break;
             case -ENOMEM: 
                 LOG_ERR("not enough memory to create node");
-                result = false;
+                result = -1; // TODO: true error code
                 break;
             case -ENOSPC:
                 LOG_ERR("too many nodes already, cannot create node");
-                result = false;
+                result = -1; // TODO: true error code
                 break;
             default:
                 LOG_ERR("unexpected result from sys_hashmap_insert");
+                result = -1; // TODO: true error code
                 break;
         }
     }
@@ -216,40 +217,43 @@ int dect_mac_node_create_node(uint32_t address, uint32_t tx_power, uint32_t mcs)
 int dect_mac_node_delete_node(uint32_t address){
 
     struct node *node_ptr;
-    bool ret;
+    
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
-        ret = sys_hashmap_remove(&node_hashmap, address, (uint64_t*)&node_ptr);
+        bool ret = sys_hashmap_remove(&node_hashmap, address, (uint64_t*)&node_ptr);
 
         if(ret){
-            //LOG_WRN("node %p deleted", (void*)node_ptr);
+            LOG_DBG("node %p deleted", (void*)node_ptr);
             k_free(node_ptr);
+            result = 0;
             
         }
         else{
             LOG_ERR("node not found");
+            result = -1; //TODO: true error code
         }
     }
     k_mutex_unlock(&node_mutex);
 
-    return ret;
+    return result;
 }
 
-int dect_mac_node_set_tx_power(uint32_t address, uint32_t tx_power){
+int dect_mac_node_set_tx_power(uint32_t address, uint8_t tx_power){
     struct node *node_ptr;
-    bool result;
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
         if(sys_hashmap_get(&node_hashmap, address, (uint64_t*)&node_ptr)){
             node_ptr->used = true; // mark node as used
             node_ptr->tx_power = tx_power;
-            result = true;
+            result = 0;
         }
         else{
             LOG_ERR("node not found");
-            result = false;
+            result = -1; //TODO: true error code
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -257,20 +261,20 @@ int dect_mac_node_set_tx_power(uint32_t address, uint32_t tx_power){
     return result; 
 }
 
-int dect_mac_node_set_mcs(uint32_t address, uint32_t mcs){
+int dect_mac_node_set_mcs(uint32_t address, int8_t mcs){
     struct node *node_ptr;
-    bool result;
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
         if(sys_hashmap_get(&node_hashmap, address, (uint64_t*)&node_ptr)){
             node_ptr->used = true; // mark node as used
             node_ptr->mcs = mcs;
-            result = true;
+            result = 0;
         }
         else{
             LOG_ERR("node not found");
-            result = false;
+            result = -1; //TODO: true error code
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -279,16 +283,15 @@ int dect_mac_node_set_mcs(uint32_t address, uint32_t mcs){
 }
 
 
-int dect_mac_node_contains_node(uint32_t address){
+bool dect_mac_node_contains_node(uint32_t address){
+
     return sys_hashmap_contains_key(&node_hashmap, address);
 }
 
-int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint32_t received_tx_power, uint32_t received_mcs){
+int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t received_tx_power, int8_t received_mcs){
     
-    //uint64_t node_addr;
+    int result = 0;
 
-    //struct node *node_ptr;
-    bool result = false;
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
         LOG_DBG("checking if node exists");
@@ -344,12 +347,13 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint32_
                 break;
             default:
                 LOG_WRN("received_tx_power not in range");
+                result = -1; //TODO: true error code
                 break;
             }
 
 
             /* compute wanted power output */
-            int power_margin = 3; // little offset to ensure good communication
+            int8_t power_margin = CONFIG_TX_POWER_MARGIN_DBM; // offset to ensure good communication
             int wanted_tx_power_dbm = received_tx_power_dbm - (rssi2 - CONFIG_RSSI_TARGET - power_margin); // set tx power to rssi2 
             LOG_DBG("wanted_tx_power_dbm: %d", wanted_tx_power_dbm);
 
@@ -407,7 +411,7 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint32_
             LOG_DBG("received_mcs: %d, snr: %d", received_mcs, snr);
 
             /* compute wanted mcs */
-            int16_t wanted_mcs;
+            int8_t wanted_mcs;
             if(snr >= 14){
                 wanted_mcs = 4; // modulation 16QAM, Coding rate 3/4 -> 14dB min for <10% PER 
             }
@@ -420,8 +424,13 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint32_
             else if(snr >= 6){ 
                 wanted_mcs = 1; // modulation QPSK, Coding rate 1/2 -> 6dB min for <10% PER
             }
-            else{
+            else if(snr >= 4){
                 wanted_mcs = 0; // modulation BPSK, Coding rate 1/2 -> 4dB min for <10% PER
+            }
+            else{
+                wanted_mcs = -1; // communication with <10% PER not possible
+                LOG_WRN("channel is too noisy, cannot garantee communication with <10% PER");
+                result = -1; //TODO: true error code
             }
 
             LOG_DBG("wanted_mcs: %d", wanted_mcs);
@@ -429,8 +438,6 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint32_
             /* put wanted mcs into the node */
             dect_mac_node_set_mcs(address, wanted_mcs);
             LOG_DBG("mcs set");
-
-            result = true;
 
             LOG_DBG("wanted_tx_power_dbm: %d, wanted_tx_power: %d, wanted_mcs: %d", wanted_tx_power_dbm, wanted_tx_power, wanted_mcs);
 
@@ -442,10 +449,10 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint32_
     return result;
 }
 
-int dect_mac_node_add_power(uint32_t address, int32_t power_to_add){
+int dect_mac_node_add_power(uint32_t address, int8_t power_to_add){
     uint64_t node_addr;
     struct node *node_ptr;
-    bool result;
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
@@ -455,22 +462,22 @@ int dect_mac_node_add_power(uint32_t address, int32_t power_to_add){
             node_ptr->tx_power += power_to_add;
 
             if(node_ptr->tx_power < 0){
-                LOG_WRN("cannot make power below 0, setting to 0");
+                LOG_DBG("cannot make power below 0, setting to 0");
                 node_ptr->tx_power = 0;
             }
             else if (node_ptr->tx_power > CONFIG_TX_POWER){
-                LOG_WRN("cannot make power above %d, setting to %d", CONFIG_TX_POWER, CONFIG_TX_POWER);
+                LOG_DBG("cannot make power above %d, setting to %d", CONFIG_TX_POWER, CONFIG_TX_POWER);
                 node_ptr->tx_power = CONFIG_TX_POWER;
             }
             else{
                 LOG_INF("new power: %d", node_ptr->tx_power);
             }
 
-            result = true;
+            result = 0;
         }
         else{
             LOG_ERR("node not found");
-            result = false;
+            result = -1; //TODO: true error code
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -478,10 +485,10 @@ int dect_mac_node_add_power(uint32_t address, int32_t power_to_add){
     return result; 
 }
 
-int dect_mac_node_reduce_mcs(uint32_t address, int32_t mcs_to_reduce){
+int dect_mac_node_reduce_mcs(uint32_t address, int8_t mcs_to_reduce){
     uint64_t node_addr;
     struct node *node_ptr;
-    bool result;
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
@@ -491,22 +498,22 @@ int dect_mac_node_reduce_mcs(uint32_t address, int32_t mcs_to_reduce){
             node_ptr->mcs -= mcs_to_reduce;
 
             if(node_ptr->mcs < 0){
-                LOG_WRN("cannot reduce mcs below 0, setting to 0");
+                LOG_DBG("cannot reduce mcs below 0, setting to 0");
                 node_ptr->mcs = 0;
             }
             else if (node_ptr->mcs > capabilities.mcs_max){
-                LOG_WRN("cannot reduce mcs above %d, setting to %d", CONFIG_MCS, CONFIG_MCS);
+                LOG_DBG("cannot reduce mcs above %d, setting to %d", capabilities.mcs_max, capabilities.mcs_max);
                 node_ptr->mcs = capabilities.mcs_max;
             }
             else{
                 LOG_INF("new mcs: %d", node_ptr->mcs);
             }
             
-            result = true;
+            result = 0;
         }
         else{
             LOG_ERR("node not found");
-            result = false;
+            result = -1; //TODO: true error code
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -515,9 +522,9 @@ int dect_mac_node_reduce_mcs(uint32_t address, int32_t mcs_to_reduce){
 }
 
 int dect_mac_node_full_power(uint32_t address){
-     uint64_t node_addr;
+    uint64_t node_addr;
     struct node *node_ptr;
-    bool result;
+    int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
@@ -527,11 +534,11 @@ int dect_mac_node_full_power(uint32_t address){
 
             node_ptr->tx_power = CONFIG_TX_POWER;
 
-            result = true;
+            result = 0;
         }
         else{
             LOG_ERR("node not found");
-            result = false;
+            result = -1; //TODO: true error code
         }
     }
     k_mutex_unlock(&node_mutex);
