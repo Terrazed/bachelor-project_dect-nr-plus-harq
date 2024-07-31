@@ -44,6 +44,9 @@ int dect_mac_node_get_tx_power(uint32_t address);
 /* function that get the mcs of a node */
 int dect_mac_node_get_mcs(uint32_t address);
 
+/* function that get the cqi of a node */
+int dect_mac_node_get_cqi(uint32_t address);
+
 /* function that create a node and put it in the hashmap */
 int dect_mac_node_create_node(uint32_t address, uint32_t tx_power, uint32_t mcs);
 
