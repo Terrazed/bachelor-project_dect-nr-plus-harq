@@ -91,8 +91,8 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
 
     /* optimize node */
     uint32_t transmitter_id = ((struct phy_ctrl_field_common_type1*)hdr)->transmitter_id_hi << 8 | ((struct phy_ctrl_field_common_type1*)hdr)->transmitter_id_lo;
-    uint32_t rssi = status->rssi_2;
-    uint32_t snr = status->snr;
+    uint32_t rssi = status->rssi_2/2; // rssi is in 0.5 dBm
+    uint32_t snr = status->snr/4; // snr is in 0.25 dB
     uint32_t transmit_power = ((struct phy_ctrl_field_common_type1*)hdr)->transmit_power;
     uint32_t transmit_mcs = ((struct phy_ctrl_field_common_type1*)hdr)->df_mcs;
     dect_mac_node_optimize(transmitter_id, rssi, snr, transmit_power, transmit_mcs);
