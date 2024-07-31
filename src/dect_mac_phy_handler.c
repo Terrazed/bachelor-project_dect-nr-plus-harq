@@ -315,8 +315,10 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     uint32_t tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
     uint32_t df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
 
-    uint32_t packet_length_type = 0; // TODO: create a function to calculate these
-    uint32_t packet_length = 2;
+    uint32_t packet_length_type;
+    uint32_t packet_length;
+
+    dect_mac_utils_get_packet_length(input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
 
     /* handle the case of sending a message with no data */
     if(input_params->data_size == 0)
