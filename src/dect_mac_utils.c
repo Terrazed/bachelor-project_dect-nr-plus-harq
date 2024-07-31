@@ -48,13 +48,14 @@ int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t 
 
     bool found = false;
     for(*packet_length = 0; *packet_length < 16; (*packet_length)++){
-        if(byte_per_mcs_and_length[*mcs][*packet_length] >= *data_size){
+        if(byte_per_mcs_and_length[*mcs][*packet_length] >= (int16_t)*data_size)
+        {
             found = true;
             break;
         }
     }
     if(!found){
-        LOG_ERR("Data size is too big for the given MCS");
+        LOG_DBG("Data size is too big for the given MCS");
     }
     //TODO: put real error code
     return found?0:-1; // return 0 if found, -1 if not found

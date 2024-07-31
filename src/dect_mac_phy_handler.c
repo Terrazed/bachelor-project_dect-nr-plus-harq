@@ -344,6 +344,8 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
         {
             LOG_WRN("mcs is now %d due to packet length", df_mcs);
         }
+
+        
     }
 
     /* handle the case of sending a message with no data */
