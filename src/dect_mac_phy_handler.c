@@ -318,7 +318,7 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     uint32_t packet_length_type;
     uint32_t packet_length;
 
-    dect_mac_utils_get_packet_length(input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+    dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
 
     /* handle the case of sending a message with no data */
     if(input_params->data_size == 0)

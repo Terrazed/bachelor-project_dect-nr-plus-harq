@@ -1,5 +1,9 @@
 #include "dect_mac_utils.h"
 
+#include <zephyr/logging/log.h>
+#include <zephyr/drivers/hwinfo.h>
+LOG_MODULE_REGISTER(utils, 3);
+
 static uint64_t m_last_modem_time_bb;
 static uint64_t m_last_app_time_bb;
 
@@ -12,7 +16,7 @@ static uint64_t dect_app_ztime_now_in_mdm_ticks(void)
 }
 
 /* Current time in modem ticks */
-uint64_t dect_app_modem_time_now(void)
+uint64_t dect_mac_utils_modem_time_now(void)
 {
 	uint64_t time_now;
 
@@ -22,7 +26,7 @@ uint64_t dect_app_modem_time_now(void)
 }
 
 /* Save the modem time */
-void dect_app_modem_time_save(uint64_t const *time)
+void dect_mac_utils_modem_time_save(uint64_t const *time)
 {
 	if (*time > m_last_modem_time_bb) {
 		m_last_modem_time_bb = *time;
@@ -30,7 +34,7 @@ void dect_app_modem_time_save(uint64_t const *time)
 	}
 }
 
-int dect_phy_handler_setup_packet_length(size_t *data_size, uint32_t *mcs, uint32_t *packet_length_type, uint32_t *packet_length){
+int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t *packet_length_type, uint32_t *packet_length){
 
     static const int16_t byte_per_mcs_and_length[5][16] = {
         {0,17,33,50,67,83,99,115,133,149,165,181,197,213,233,249},
