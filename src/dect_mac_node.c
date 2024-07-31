@@ -97,17 +97,18 @@ uint8_t dect_mac_node_get_tx_power(uint32_t address)
         {
             LOG_INF("tx_power: node %d not found, creating the node", address);
             should_create_node = true;
-            result = 0;
         }
     }
     k_mutex_unlock(&node_mutex);
 
     if (should_create_node)
     {
-        if (dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max))
+        int ret = dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
+        if (ret)
         {
-            result = CONFIG_TX_POWER;
+            LOG_ERR("tx_power: cannot create node");
         }
+        result = CONFIG_TX_POWER;
     }
 
     return result;
@@ -134,17 +135,19 @@ int8_t dect_mac_node_get_mcs(uint32_t address)
         {
             LOG_INF("mcs: node %d not found, creating the node", address);
             should_create_node = true;
-            result = 0;
         }
     }
     k_mutex_unlock(&node_mutex);
 
     if (should_create_node)
     {
-        if (dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max))
+        int ret = dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
+        if(ret)
         {
-            result = capabilities.mcs_max;
+            LOG_ERR("mcs: cannot create node");
         }
+        
+        result = capabilities.mcs_max;
     }
 
     return result;
@@ -178,10 +181,13 @@ uint8_t dect_mac_node_get_cqi(uint32_t address)
 
     if (should_create_node)
     {
-        if (dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max))
+        int ret = dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
+        if(ret)
         {
-            result = capabilities.mcs_max + 1;
+            LOG_ERR("cqi: cannot create node");
         }
+        
+        result = capabilities.mcs_max + 1;
     }
 
     return result;
@@ -325,7 +331,12 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
         LOG_DBG("checking if node exists");
         if (!dect_mac_node_contains_node(address))
         {
-            dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
+            int ret = dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
+            if (ret)
+            {
+                LOG_ERR("cannot create node");
+                result = -1; // TODO: true error code
+            }
         }
 
         LOG_INF("received_tx_power: %d, received_mcs: %d, rssi: %d, snr: %d", received_tx_power, received_mcs, rssi2, snr);
