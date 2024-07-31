@@ -54,7 +54,6 @@ int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t 
         }
     }
     if(!found){
-        *packet_length = 16;
         LOG_ERR("Data size is too big for the given MCS");
     }
     //TODO: put real error code

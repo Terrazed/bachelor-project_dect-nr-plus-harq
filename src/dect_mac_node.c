@@ -560,18 +560,19 @@ int dect_mac_node_reduce_mcs(uint32_t address, int8_t mcs_to_reduce)
             {
                 LOG_DBG("cannot reduce mcs below 0, setting to 0");
                 node_ptr->mcs = 0;
+                result = -1; // TODO: true error code
             }
             else if (node_ptr->mcs > capabilities.mcs_max)
             {
-                LOG_DBG("cannot reduce mcs above %d, setting to %d", capabilities.mcs_max, capabilities.mcs_max);
+                LOG_DBG("cannot makes the mcs above %d, setting to %d", capabilities.mcs_max, capabilities.mcs_max);
                 node_ptr->mcs = capabilities.mcs_max;
+                result = -1; // TODO: true error code
             }
             else
             {
                 LOG_INF("new mcs: %d", node_ptr->mcs);
-            }
-
-            result = 0;
+                result = 0;
+            }            
         }
         else
         {

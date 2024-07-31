@@ -318,7 +318,33 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     uint32_t packet_length_type;
     uint32_t packet_length;
 
-    dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+    int ret = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+    if (ret)
+    {
+        LOG_WRN("packet length is too long for current mcs, trying to augment mcs to fit the packet length");
+
+        int can_augment_mcs = -1;
+        int found_packet_length = -1;
+
+        /* finds a mcs where data fits */
+        do
+        {
+            can_augment_mcs = dect_mac_node_reduce_mcs(input_params->receiver_id, -1);
+            df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
+            found_packet_length = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+        }
+        while (can_augment_mcs == 0 && found_packet_length != 0);
+
+        if (found_packet_length != 0)
+        {
+            LOG_ERR("packet length is too long for current mcs, could not find a mcs that fits the packet length, putting the packet length to 15");
+            packet_length = 15;
+        }
+        else
+        {
+            LOG_WRN("mcs is now %d due to packet length", df_mcs);
+        }
+    }
 
     /* handle the case of sending a message with no data */
     if(input_params->data_size == 0)
