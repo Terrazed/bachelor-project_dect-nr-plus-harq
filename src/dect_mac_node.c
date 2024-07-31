@@ -83,7 +83,7 @@ int dect_mac_node_get_tx_power(uint32_t address){
             LOG_DBG("tx_power: %d, key: %d", result, address);
         }
         else{
-            LOG_DBG("tx_power: node %d not found, creating the node", address);
+            LOG_INF("tx_power: node %d not found, creating the node", address);
             should_create_node = true;
             result = 0;
         }
@@ -115,7 +115,7 @@ int dect_mac_node_get_mcs(uint32_t address){
             LOG_DBG("mcs: %d, key: %d", result, address);
         }
         else{
-            LOG_ERR("mcs: node %d not found, creating the node", address);
+            LOG_INF("mcs: node %d not found, creating the node", address);
             should_create_node = true;
             result = 0;
         }
@@ -129,6 +129,44 @@ int dect_mac_node_get_mcs(uint32_t address){
     }
 
     return result;
+}
+
+int dect_mac_node_get_cqi(uint32_t address)
+{
+    uint64_t node_addr;
+    struct node *node_ptr;
+    int result;
+
+    bool should_create_node = false;
+
+    k_mutex_lock(&node_mutex, K_FOREVER);
+    {
+        if (sys_hashmap_get(&node_hashmap, address, (uint64_t *)&node_addr))
+        {
+            node_ptr = (struct node *)node_addr;
+            node_ptr->used = true; // mark node as used
+            result = node_ptr->mcs+1;
+            LOG_DBG("cqi: %d, key: %d", result, address);
+        }
+        else
+        {
+            LOG_INF("cqi: node %d not found, creating the node", address);
+            should_create_node = true;
+            result = 0;
+        }
+    }
+    k_mutex_unlock(&node_mutex);
+
+    if (should_create_node)
+    {
+        if (dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max))
+        {
+            result = capabilities.mcs_max+1;
+        }
+    }
+
+    return result;
+
 }
 
 int dect_mac_node_create_node(uint32_t address, uint32_t tx_power, uint32_t mcs){
