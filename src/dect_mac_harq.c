@@ -14,7 +14,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
 {
     /* config the operation */
     struct dect_mac_phy_handler_tx_harq_params params = {
-        .handle = HANDLE_HARQ + header->df_harq_process_nr,
+        .handle = (HANDLE_HARQ + header->df_harq_process_nr) | (1<<27),
         .lbt_enable = false,
         .data = NULL,
         .data_size = 0,
@@ -27,6 +27,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
 
     /* send the acknoledgement */
     dect_mac_phy_handler_tx_harq(params);
+    dect_phy_queue_put(PLACEHOLDER, NO_PARAMS, PRIORITY_CRITICAL);
 }
 
 void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
@@ -50,7 +51,6 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
         LOG_WRN("NACK received for harq process %d", feedback.format_1.harq_process_number);
         dect_mac_harq_increment_redundancy_version(harq_process);
         int ret = k_work_reschedule_for_queue(&dect_mac_harq_work_queue, &harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
-        LOG_WRN("Rescheduling retransmission work returned %d", ret);
     }
 }
 
