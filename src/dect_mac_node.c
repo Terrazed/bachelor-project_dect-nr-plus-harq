@@ -142,11 +142,11 @@ int8_t dect_mac_node_get_mcs(uint32_t address)
     if (should_create_node)
     {
         int ret = dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
-        if(ret)
+        if (ret)
         {
             LOG_ERR("mcs: cannot create node");
         }
-        
+
         result = capabilities.mcs_max;
     }
 
@@ -182,11 +182,11 @@ uint8_t dect_mac_node_get_cqi(uint32_t address)
     if (should_create_node)
     {
         int ret = dect_mac_node_create_node(address, CONFIG_TX_POWER, capabilities.mcs_max);
-        if(ret)
+        if (ret)
         {
             LOG_ERR("cqi: cannot create node");
         }
-        
+
         result = capabilities.mcs_max + 1;
     }
 
@@ -526,7 +526,7 @@ int dect_mac_node_add_power(uint32_t address, int8_t power_to_add)
             }
             else
             {
-                LOG_INF("new power: %d", node_ptr->tx_power);
+                LOG_DBG("new power: %d", node_ptr->tx_power);
             }
 
             result = 0;
@@ -570,9 +570,9 @@ int dect_mac_node_reduce_mcs(uint32_t address, int8_t mcs_to_reduce)
             }
             else
             {
-                LOG_INF("new mcs: %d", node_ptr->mcs);
+                LOG_DBG("new mcs: %d", node_ptr->mcs);
                 result = 0;
-            }            
+            }
         }
         else
         {
