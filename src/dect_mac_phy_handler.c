@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler,3);
+LOG_MODULE_REGISTER(handler, 3);
 
 uint16_t device_id = 0;
 enum dect_mac_phy_state current_state = IDLING;
@@ -31,15 +31,15 @@ int dect_mac_phy_handler_start_modem()
     /* Get the device ID. */
     LOG_DBG("Getting device ID");
     hwinfo_get_device_id((void *)&device_id, sizeof(device_id));
-    //device_id = 0x1234; // TODO: remove this line and uncomment the line above
+    // device_id = 0x1234; // TODO: remove this line and uncomment the line above
 
     /* get the capability of the api */
-    //dect_mac_phy_handler_capability_get();
+    // dect_mac_phy_handler_capability_get();
     LOG_DBG("Getting capability");
     dect_phy_queue_put(CAPABILITY_GET, NO_PARAMS, PRIORITY_CRITICAL);
 
     /* initialize the dect phy modem */
-    //dect_mac_phy_handler_init();
+    // dect_mac_phy_handler_init();
     LOG_DBG("Initializing");
     dect_phy_queue_put(INIT, NO_PARAMS, PRIORITY_CRITICAL);
 
@@ -87,7 +87,7 @@ void dect_mac_phy_handler_init()
     /* create init parameters */
     const struct nrf_modem_dect_phy_init_params params = {
         .harq_rx_expiry_time_us = CONFIG_HARQ_RX_EXPIRY_TIME_US,
-        .harq_rx_process_count = capabilities.harq_process_count_max,
+        .harq_rx_process_count = 4,
     };
 
     /* initialize the dect phy modem */
@@ -315,11 +315,41 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     uint32_t tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
     uint32_t df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
 
-    uint32_t packet_length_type = 0; // TODO: create a function to calculate these
-    uint32_t packet_length = 2;
+    uint32_t packet_length_type;
+    uint32_t packet_length;
+
+    int ret = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+    if (ret)
+    {
+        LOG_DBG("packet length is too long for current mcs, trying to augment mcs to fit the packet length");
+
+        int can_augment_mcs = -1;
+        int found_packet_length = -1;
+
+        /* finds a mcs where data fits */
+        do
+        {
+            can_augment_mcs = dect_mac_node_reduce_mcs(input_params->receiver_id, -1);
+            dect_mac_node_add_power(input_params->receiver_id, 1);
+            df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
+            tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
+            found_packet_length = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+        } while (can_augment_mcs == 0 && found_packet_length != 0);
+
+        if (found_packet_length != 0)
+        {
+            LOG_ERR("packet length is too long for this device, please send the datas in smaller chunks");
+        }
+        else
+        {
+            LOG_DBG("mcs is now %d and the power is %d due to packet length", df_mcs, tx_power);
+        }
+
+        LOG_DBG("packet_length_type: %d, packet_length: %d, df_mcs: %d", packet_length_type, packet_length, df_mcs);
+    }
 
     /* handle the case of sending a message with no data */
-    if(input_params->data_size == 0)
+    if (input_params->data_size == 0)
     {
         packet_length_type = 0;
         packet_length = 0;
@@ -396,5 +426,5 @@ void dect_mac_phy_handler_rx_config(struct dect_mac_phy_handler_rx_params *input
     output_params->duration = input_params->rx_period_ms * 69120;
     output_params->filter.short_network_id = CONFIG_NETWORK_ID;
     output_params->filter.is_short_network_id_used = true;
-    output_params->filter.receiver_identity = 0;//input_params->receiver_identity;
+    output_params->filter.receiver_identity = 0; // input_params->receiver_identity;
 }

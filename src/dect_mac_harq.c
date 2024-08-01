@@ -22,7 +22,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
         .buffer_status = 0xf, // TODO: buffer status
         .channel_quality_indicator = dect_mac_node_get_cqi(header->transmitter_id_hi << 8 | header->transmitter_id_lo),
         .harq_process_number = header->df_harq_process_nr,
-        .start_time = start_time + (3 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
+        .start_time = start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
     };
 
     /* send the acknoledgement */

@@ -9,6 +9,8 @@
         "dect_mac_phy_handler_cb.h": "c",
         "hwinfo.h": "c",
         "dect_mac_harq.h": "c",
-        "dk_buttons_and_leds.h": "c"
-    }
+        "dk_buttons_and_leds.h": "c",
+        "stdint.h": "c"
+    },
+    "nrf-connect.toolchain.path": "${nrf-connect.toolchain:2.7.0}"
 }
