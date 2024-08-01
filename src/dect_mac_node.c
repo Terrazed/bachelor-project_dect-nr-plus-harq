@@ -21,33 +21,25 @@ void dect_mac_node_thread()
 
 void dect_mac_node_clean_unused_nodes()
 {
-    // LOG_DBG("cleaning unused nodes");
 
     struct sys_hashmap_iterator iterator;
     struct sys_hashmap_iterator delete_iterator;
     struct node *node_ptr;
 
-    // LOG_DBG("gettin the iterator");
     node_hashmap.api->iter(&node_hashmap, &iterator); // initialize iterator
     if (sys_hashmap_iterator_has_next(&iterator))
     {
         iterator.next(&iterator); // move to first node
     }
-
-    // LOG_DBG("starting while loop");
     while (sys_hashmap_iterator_has_next(&iterator))
     {
 
-        // LOG_DBG("copying iterator");
         memcpy(&delete_iterator, &iterator, sizeof(struct sys_hashmap_iterator)); // save last iterator
 
-        // LOG_DBG("getting next node");
         iterator.next(&iterator); // move to next node (this has to be done before deleting the node to avoid iterator corruption)
 
-        // LOG_DBG("getting node address");
         node_ptr = (struct node *)delete_iterator.value; // get node
 
-        // LOG_DBG("checking if node is used, node: %d, value: %d", node_ptr, delete_iterator.value);
         if (!node_ptr->used)
         {
             LOG_INF("deleting node %d", node_ptr->address);
@@ -358,31 +350,43 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
             received_tx_power_dbm = -20;
             break;
         case 3:
-            received_tx_power_dbm = -13;
+            received_tx_power_dbm = -16;
             break;
         case 4:
-            received_tx_power_dbm = -6;
+            received_tx_power_dbm = -12;
             break;
         case 5:
-            received_tx_power_dbm = -3;
+            received_tx_power_dbm = -8;
             break;
         case 6:
-            received_tx_power_dbm = 0;
+            received_tx_power_dbm = -4;
             break;
         case 7:
-            received_tx_power_dbm = 3;
+            received_tx_power_dbm = 0;
             break;
         case 8:
-            received_tx_power_dbm = 6;
+            received_tx_power_dbm = 4;
             break;
         case 9:
-            received_tx_power_dbm = 10;
+            received_tx_power_dbm = 7;
             break;
         case 10:
-            received_tx_power_dbm = 14;
+            received_tx_power_dbm = 10;
             break;
         case 11:
+            received_tx_power_dbm = 13;
+            break;
+        case 12:
+            received_tx_power_dbm = 16;
+            break;
+        case 13:
             received_tx_power_dbm = 19;
+            break;
+        case 14:
+            received_tx_power_dbm = 21;
+            break;
+        case 15:
+            received_tx_power_dbm = 23;
             break;
         default:
             LOG_WRN("received_tx_power not in range");
@@ -411,41 +415,57 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
         {
             wanted_tx_power = 2;
         }
-        else if (wanted_tx_power_dbm <= -13)
+        else if (wanted_tx_power_dbm <= -16)
         {
             wanted_tx_power = 3;
         }
-        else if (wanted_tx_power_dbm <= -6)
+        else if (wanted_tx_power_dbm <= -12)
         {
             wanted_tx_power = 4;
         }
-        else if (wanted_tx_power_dbm <= -3)
+        else if (wanted_tx_power_dbm <= -8)
         {
             wanted_tx_power = 5;
         }
-        else if (wanted_tx_power_dbm <= 0)
+        else if (wanted_tx_power_dbm <= -4)
         {
             wanted_tx_power = 6;
         }
-        else if (wanted_tx_power_dbm <= 3)
+        else if (wanted_tx_power_dbm <= 0)
         {
             wanted_tx_power = 7;
         }
-        else if (wanted_tx_power_dbm <= 6)
+        else if (wanted_tx_power_dbm <= 4)
         {
             wanted_tx_power = 8;
         }
-        else if (wanted_tx_power_dbm <= 10)
+        else if (wanted_tx_power_dbm <= 7)
         {
             wanted_tx_power = 9;
         }
-        else if (wanted_tx_power_dbm <= 14)
+        else if (wanted_tx_power_dbm <= 10)
         {
             wanted_tx_power = 10;
         }
-        else
+        else if (wanted_tx_power_dbm <= 13)
         {
             wanted_tx_power = 11;
+        }
+        else if (wanted_tx_power_dbm <= 16)
+        {
+            wanted_tx_power = 12;
+        }
+        else if (wanted_tx_power_dbm <= 19)
+        {
+            wanted_tx_power = 13;
+        }
+        else if (wanted_tx_power_dbm <= 21)
+        {
+            wanted_tx_power = 13; // not enough power with this device to reach power 14
+        }
+        else
+        {
+            wanted_tx_power = 13; // not enough power with this device to reach power 15
         }
 
         LOG_DBG("wanted_tx_power: %d", wanted_tx_power);
