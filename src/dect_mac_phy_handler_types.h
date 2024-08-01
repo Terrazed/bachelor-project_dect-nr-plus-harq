@@ -96,7 +96,7 @@ struct harq_tx_params
 	uint32_t redundancy_version : 2;
 	uint32_t new_data_indication : 1;
 	uint32_t harq_process_nr : 3;
-	uint32_t buffer_size; // buffer size in bytes
+	uint32_t buffer_size : 4; // buffer size in bytes
 };
 
 /* enumerate the different usage of the tx function */
@@ -144,7 +144,9 @@ struct dect_mac_phy_handler_tx_harq_params
 	uint8_t *data;
 	size_t data_size;
 	uint32_t receiver_id;
-	struct harq_tx_params harq;
+	uint32_t buffer_status : 4;
+	uint32_t channel_quality_indicator : 4;
+	uint32_t harq_process_number : 3;
 	uint64_t start_time;
 };
 
@@ -173,7 +175,7 @@ struct dect_mac_phy_handler_rssi_params
 
 struct dect_mac_phy_handler_rx_stop_params
 {
-	uint32_t handle : 28;
+	uint32_t handle;
 };
 
 union dect_mac_phy_handler_params
@@ -187,6 +189,20 @@ union dect_mac_phy_handler_params
 };
 
 #define NO_PARAMS (union dect_mac_phy_handler_params*) NULL
+#define DECT_MAC_PHY_HANDLER_NO_FEEDBACK 	\ 	
+	{										\
+		.format = NO_FEEDBACK,				\
+		.info = {							\
+			.raw = 0,						\
+		}									\
+	}
+#define DECT_MAC_PHY_HANDLER_NO_HARQ 	\
+	{									\
+		.redundancy_version = 0,		\
+		.new_data_indication = 0,		\
+		.harq_process_nr = 0,			\
+		.buffer_size = 0,				\
+	}
 
 /* Header type 1, due to endianness the order is different than in the specification. */
 struct phy_ctrl_field_common_type1

@@ -8,7 +8,7 @@
 #include "dect_mac_phy_handler.h"
 
 /* stack size in bytes of the thread that reads the list */
-#define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 1024
+#define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 2048
 
 /* maximum number of item that the queue can contains */
 #define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 32
@@ -34,8 +34,18 @@ struct dect_mac_phy_handler_queue_item {
     enum dect_mac_phy_handler_queue_priority priority;
 };
 
+struct dect_mac_phy_handler_queue_work {
+    struct k_work work;
+    enum dect_mac_phy_function function;
+    union dect_mac_phy_handler_params params;
+    enum dect_mac_phy_handler_queue_priority priority;
+};
+
 /* function to put an operation in the waiting queue of the dect phy api */
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority);
+
+/* function that really puts the operation in the queue, this is done to handle putting an operation while being in an ISR */
+void dect_mac_phy_queue_work_handler(struct k_work *work);
 
 /* function to execute an operation from the waiting queue of the dect phy api */
 int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
@@ -68,6 +78,9 @@ extern struct k_timer dect_mac_phy_handler_queue_operation_failed_timer;
 
 /* counter that counts how many times the operation has tried to execute but failed */
 extern uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
+
+/* work that is used to schedule the execution of an operation */
+extern struct k_work_q dect_mac_phy_handler_queue_work_queue;
 
 
 #endif // DECT_MAC_PHY_HANDLER_QUEUE_H

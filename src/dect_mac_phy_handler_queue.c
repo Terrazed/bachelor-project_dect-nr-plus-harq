@@ -8,13 +8,54 @@ K_SEM_DEFINE(phy_layer_sem, 1, 1);
 K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
 K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_handler_queue_timer_callback, NULL);
+K_THREAD_STACK_DEFINE(dect_mac_phy_handler_queue_work_queue_stack, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE);
 
-sys_slist_t dect_mac_phy_handler_queue;
+sys_slist_t dect_mac_phy_handler_queue = SYS_SLIST_STATIC_INIT(&dect_mac_phy_handler_queue);
 struct dect_mac_phy_handler_queue_item current_item = {0};
 uint32_t dect_mac_phy_handler_queue_operation_failed_counter = 0;
+struct k_work_q dect_mac_phy_handler_queue_work_queue;
 
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority)
 {
+
+    /* create the work */
+    struct dect_mac_phy_handler_queue_work *dect_mac_phy_handler_queue_work = k_malloc(sizeof(struct dect_mac_phy_handler_queue_work)); // TODO: use memory pool instead of malloc
+    if (dect_mac_phy_handler_queue_work == NULL)
+    {
+        LOG_ERR("Failed to allocate memory for the work");
+        return -1; //TODO: return a proper error code
+    }
+    k_work_init(&dect_mac_phy_handler_queue_work->work, dect_mac_phy_queue_work_handler);
+
+    
+
+    /* create the work context */
+    dect_mac_phy_handler_queue_work->function = function;
+    if(params != NULL)
+    {
+        dect_mac_phy_handler_queue_work->params = *params;
+    } 
+    else
+    {
+        dect_mac_phy_handler_queue_work->params = (union dect_mac_phy_handler_params){0};
+    }
+    dect_mac_phy_handler_queue_work->priority = priority;
+
+    /* submit the work */
+    k_work_submit_to_queue(&dect_mac_phy_handler_queue_work_queue ,&dect_mac_phy_handler_queue_work->work);
+
+    return 0;
+}
+
+void dect_mac_phy_queue_work_handler(struct k_work *work)
+{
+    /* get the context */
+    struct dect_mac_phy_handler_queue_work *work_context = CONTAINER_OF(work, struct dect_mac_phy_handler_queue_work, work);
+    enum dect_mac_phy_function function = work_context->function;
+    union dect_mac_phy_handler_params params = work_context->params;
+    uint32_t priority = work_context->priority;
+
+    
 
     LOG_DBG("Adding item to the queue - function: %d, priority: %u", function, priority);
 
@@ -30,20 +71,13 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
         if (item == NULL)
         {
             LOG_ERR("Failed to allocate memory for the queue item");
-            return -1; // TODO: return a proper error code
+            return;
         }
 
         /* init the item */
         LOG_DBG("Initializing the queue item");
         item->function = function;
-        if(params != NULL)
-        {
-            item->params = *params;
-        }
-        else
-        {
-            item->params = (union dect_mac_phy_handler_params){0};
-        }
+        item->params = params;
         item->priority = priority;
 
         /* check if the maximum number of item in the queue is already reached */
@@ -51,7 +85,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
         { 
             LOG_ERR("The queue is full, cannot add more items");
             k_mutex_unlock(&queue_mutex);
-            return -1; // TODO: return a proper error code
+            return;
         }
 
         /* if the list is empty, add the item to the head */
@@ -90,7 +124,9 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     /* notify the thread that there is an item in the queue */
     k_sem_give(&queue_item_sem);
 
-    return 0;
+    /* free the work */
+    /* WARNING, THIS SHOULD NOT BE DONE IN THE HANDLER BECAUSE THE WORK WILL BE UPDATED AFTER BEING DONE WITH THE HANDLE SO IT UPDATES A PLACE IN THE MEMORY THAT IS FREED */
+    k_free(work_context); // TODO: use memory pool instead of free
 }
 
 int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
@@ -156,13 +192,16 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
             LOG_ERR("Unknown function: %d", function);
             return -1; // TODO: return a proper error code
     }
-
+    return 0;
 }
 
 void dect_mac_phy_queue_thread()
 {
 
     LOG_DBG("Starting the queue thread");
+
+    k_work_queue_init(&dect_mac_phy_handler_queue_work_queue);
+    k_work_queue_start(&dect_mac_phy_handler_queue_work_queue, dect_mac_phy_handler_queue_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_phy_handler_queue_work_queue_stack), 9, NULL);
 
     while (1)
     {
@@ -174,7 +213,6 @@ void dect_mac_phy_queue_thread()
 
         /* wait for a new item in the queue */
         k_sem_take(&queue_item_sem, K_FOREVER);
-
         LOG_DBG("Got a new item in the queue");
 
         struct dect_mac_phy_handler_queue_item local_item;
@@ -207,6 +245,7 @@ void dect_mac_phy_queue_thread()
         /* reset fail counter and execute the function */
         LOG_DBG("Executing the function");
         dect_mac_phy_handler_queue_operation_failed_counter = 0;
+
         dect_mac_phy_queue_function_execute(local_item.function, &local_item.params);
     }
 }
