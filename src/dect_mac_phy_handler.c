@@ -87,7 +87,7 @@ void dect_mac_phy_handler_init()
     /* create init parameters */
     const struct nrf_modem_dect_phy_init_params params = {
         .harq_rx_expiry_time_us = CONFIG_HARQ_RX_EXPIRY_TIME_US,
-        .harq_rx_process_count = capabilities.harq_process_count_max,
+        .harq_rx_process_count = 4,
     };
 
     /* initialize the dect phy modem */
@@ -343,10 +343,13 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
         else
         {
             LOG_WRN("mcs is now %d due to packet length", df_mcs);
+            packet_length = found_packet_length;
         }
 
         
     }
+
+    LOG_INF("packet_length_type: %d, packet_length: %d, df_mcs: %d", packet_length_type, packet_length, df_mcs);
 
     /* handle the case of sending a message with no data */
     if(input_params->data_size == 0)
