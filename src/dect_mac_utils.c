@@ -57,7 +57,6 @@ int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t 
     if(!found){
         LOG_DBG("Data size is too big for the given MCS");
     }
-    //TODO: put real error code
     return found?OK:PACKET_TOO_BIG; // return 0 if found, -1 if not found
 
 
