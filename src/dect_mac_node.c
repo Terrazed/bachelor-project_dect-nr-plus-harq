@@ -166,7 +166,6 @@ uint8_t dect_mac_node_get_cqi(uint32_t address)
         {
             LOG_INF("cqi: node %d not found, creating the node", address);
             should_create_node = true;
-            result = 0;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -246,7 +245,7 @@ int dect_mac_node_delete_node(uint32_t address)
         {
             LOG_DBG("node %p deleted", (void *)node_ptr);
             k_free(node_ptr);
-            result = 0;
+            result = OK;
         }
         else
         {
@@ -270,7 +269,7 @@ int dect_mac_node_set_tx_power(uint32_t address, uint8_t tx_power)
         {
             node_ptr->used = true; // mark node as used
             node_ptr->tx_power = tx_power;
-            result = 0;
+            result = OK;
         }
         else
         {
@@ -294,7 +293,7 @@ int dect_mac_node_set_mcs(uint32_t address, int8_t mcs)
         {
             node_ptr->used = true; // mark node as used
             node_ptr->mcs = mcs;
-            result = 0;
+            result = OK;
         }
         else
         {
@@ -316,7 +315,7 @@ bool dect_mac_node_contains_node(uint32_t address)
 int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t received_tx_power, int8_t received_mcs)
 {
 
-    int result = 0;
+    int result = OK;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
@@ -549,7 +548,7 @@ int dect_mac_node_add_power(uint32_t address, int8_t power_to_add)
                 LOG_DBG("new power: %d", node_ptr->tx_power);
             }
 
-            result = 0;
+            result = OK;
         }
         else
         {
@@ -620,7 +619,7 @@ int dect_mac_node_full_power(uint32_t address)
 
             node_ptr->tx_power = CONFIG_TX_POWER;
 
-            result = 0;
+            result = OK;
         }
         else
         {
