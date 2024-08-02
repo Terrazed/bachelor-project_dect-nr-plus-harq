@@ -79,7 +79,7 @@ extern struct k_timer dect_mac_phy_handler_queue_operation_failed_timer;
 extern uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
 
 /* work that is used to schedule the execution of an operation */
-extern struct k_work_q dect_mac_phy_handler_queue_work_queue;
+extern struct k_msgq dect_mac_phy_handler_queue_msgq;
 
 
 #endif // DECT_MAC_PHY_HANDLER_QUEUE_H
