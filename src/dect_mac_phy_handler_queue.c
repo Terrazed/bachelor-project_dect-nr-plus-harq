@@ -53,7 +53,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
         return ret;
     }
 
-    return 0;
+    return OK;
 }
 
 void dect_mac_phy_handler_queue_put_thread(struct k_work *work)
@@ -209,7 +209,7 @@ int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function funct
         LOG_ERR("Unknown function: %d", function);
         return FUNC_NOT_EXIST;
     }
-    return 0;
+    return OK;
 }
 
 void dect_mac_phy_handler_queue_exec_thread()
