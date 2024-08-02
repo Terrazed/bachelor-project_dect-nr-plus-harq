@@ -59,7 +59,7 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
     /* get a harq process */
     struct dect_mac_harq_process *harq_process = dect_mac_harq_take_process();
     if(harq_process == NULL){
-        return -1; // TODO: error code of no free harq process
+        return NO_FREE_HARQ;
     }
 
     /* copy the data to the harq process */
@@ -67,7 +67,7 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
     if(data == NULL){
         dect_mac_harq_give_process(harq_process);
         LOG_ERR("No memory for harq data");
-        return -1; // TODO: error code of no memory
+        return NO_MEM_HEAP;
     }
     memcpy(data, params.data, params.data_len);
 
