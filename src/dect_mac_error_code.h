@@ -15,6 +15,7 @@ enum dect_mac_error_code
     MAX_MCS_REACHED = 9, // the maximum MCS has already been reached and it cannot be increased
     NO_MEM_SLAB = 10, // the program does not have enough memory in the slab to allocate the needed memory
     FUNC_NOT_EXIST = 11, // the function does not exist
+    PACKET_TOO_BIG = 12, // the packet is too big for the given MCS
 };
 
 
