@@ -3,7 +3,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(phy_queue,3);
 
-K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE, dect_mac_phy_queue_thread, NULL, NULL, NULL, 10, 0, 0);
+K_THREAD_DEFINE(dect_phy_queue_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE, dect_mac_phy_handler_queue_exec_thread, NULL, NULL, NULL, 10, 0, 0);
 K_SEM_DEFINE(phy_layer_sem, 1, 1);
 K_SEM_DEFINE(queue_item_sem, 0, DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS);
 K_MUTEX_DEFINE(queue_mutex);
@@ -129,7 +129,7 @@ void dect_mac_phy_queue_work_handler(struct k_work *work)
     k_free(work_context); // TODO: use memory pool instead of free
 }
 
-int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
+int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
 {
     /* saving the current operation in case of a failed operation */
     current_item.function = function;
@@ -195,7 +195,7 @@ int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, uni
     return 0;
 }
 
-void dect_mac_phy_queue_thread()
+void dect_mac_phy_handler_queue_exec_thread()
 {
 
     LOG_DBG("Starting the queue thread");
@@ -246,7 +246,7 @@ void dect_mac_phy_queue_thread()
         LOG_DBG("Executing the function");
         dect_mac_phy_handler_queue_operation_failed_counter = 0;
 
-        dect_mac_phy_queue_function_execute(local_item.function, &local_item.params);
+        dect_mac_phy_handler_queue_function_execute(local_item.function, &local_item.params);
     }
 }
 
@@ -272,5 +272,5 @@ void dect_mac_phy_handler_queue_operation_failed_retry(struct k_timer *timer)
 
 void dect_mac_phy_handler_queue_timer_callback(struct k_timer *timer_id)
 {
-    dect_mac_phy_queue_function_execute(current_item.function, &current_item.params);
+    dect_mac_phy_handler_queue_function_execute(current_item.function, &current_item.params);
 }

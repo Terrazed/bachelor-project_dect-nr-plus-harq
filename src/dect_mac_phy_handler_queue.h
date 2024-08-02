@@ -48,10 +48,10 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
 void dect_mac_phy_queue_work_handler(struct k_work *work);
 
 /* function to execute an operation from the waiting queue of the dect phy api */
-int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
+int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
 
 /* thread where the list is read whenever something is in it */
-void dect_mac_phy_queue_thread();
+void dect_mac_phy_handler_queue_exec_thread();
 
 /* function to retry the scheduling of an operation */
 void dect_mac_phy_handler_queue_operation_failed_retry();
