@@ -9,7 +9,7 @@
 
 #define DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE 1024
 
-#define HARQ_PROCESS_MAX 8
+#define HARQ_PROCESS_MAX 4
 #define HANDLE_HARQ 0xA0
 #define ACK 1
 #define NACK 0
