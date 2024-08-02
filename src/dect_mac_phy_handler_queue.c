@@ -27,8 +27,8 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     int ret = k_mem_slab_alloc(&dect_mac_phy_handler_queue_item_slab, &dect_mac_phy_handler_queue_item, K_NO_WAIT);
     if (ret)
     {
-        LOG_ERR("Failed to allocate memory for the work");
-        return -1; // TODO: return a proper error code
+        LOG_ERR("Failed to allocate memory for the item");
+        return NO_MEM_SLAB;
     }
 
     /* create the work context */
@@ -50,7 +50,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     if (ret)
     {
         LOG_ERR("Failed to put the item in the queue");
-        return -1; // TODO: return a proper error code
+        return ret;
     }
 
     return 0;
@@ -207,7 +207,7 @@ int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function funct
         break;
     default:
         LOG_ERR("Unknown function: %d", function);
-        return -1; // TODO: return a proper error code
+        return FUNC_NOT_EXIST;
     }
     return 0;
 }

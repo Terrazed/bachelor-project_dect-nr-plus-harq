@@ -13,6 +13,8 @@ enum dect_mac_error_code
     CHANNEL_TOO_NOISY = 7, // the channel is too noisy to transmit with <10% PER
     MIN_MCS_REACHED = 8, // the minimum MCS has already been reached and it cannot be decreased
     MAX_MCS_REACHED = 9, // the maximum MCS has already been reached and it cannot be increased
+    NO_MEM_SLAB = 10, // the program does not have enough memory in the slab to allocate the needed memory
+    FUNC_NOT_EXIST = 11, // the function does not exist
 };
 
 
