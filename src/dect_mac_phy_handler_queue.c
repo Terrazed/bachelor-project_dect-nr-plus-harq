@@ -11,7 +11,7 @@ K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_h
 K_THREAD_STACK_DEFINE(dect_mac_phy_handler_queue_work_queue_stack, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE);
 
 sys_slist_t dect_mac_phy_handler_queue = SYS_SLIST_STATIC_INIT(&dect_mac_phy_handler_queue);
-struct dect_mac_phy_handler_queue_item current_item = {0};
+struct dect_mac_phy_handler_queue_node current_node = {0};
 uint32_t dect_mac_phy_handler_queue_operation_failed_counter = 0;
 struct k_work_q dect_mac_phy_handler_queue_work_queue;
 
@@ -19,38 +19,38 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
 {
 
     /* create the work */
-    struct dect_mac_phy_handler_queue_work *dect_mac_phy_handler_queue_work = k_malloc(sizeof(struct dect_mac_phy_handler_queue_work)); // TODO: use memory pool instead of malloc
-    if (dect_mac_phy_handler_queue_work == NULL)
+    struct dect_mac_phy_handler_queue_item *dect_mac_phy_handler_queue_item = k_malloc(sizeof(struct dect_mac_phy_handler_queue_item)); // TODO: use memory pool instead of malloc
+    if (dect_mac_phy_handler_queue_item == NULL)
     {
         LOG_ERR("Failed to allocate memory for the work");
         return -1; //TODO: return a proper error code
     }
-    k_work_init(&dect_mac_phy_handler_queue_work->work, dect_mac_phy_queue_work_handler);
+    k_work_init(&dect_mac_phy_handler_queue_item->work, dect_mac_phy_handler_queue_put_thread);
 
     
 
     /* create the work context */
-    dect_mac_phy_handler_queue_work->function = function;
+    dect_mac_phy_handler_queue_item->function = function;
     if(params != NULL)
     {
-        dect_mac_phy_handler_queue_work->params = *params;
+        dect_mac_phy_handler_queue_item->params = *params;
     } 
     else
     {
-        dect_mac_phy_handler_queue_work->params = (union dect_mac_phy_handler_params){0};
+        dect_mac_phy_handler_queue_item->params = (union dect_mac_phy_handler_params){0};
     }
-    dect_mac_phy_handler_queue_work->priority = priority;
+    dect_mac_phy_handler_queue_item->priority = priority;
 
     /* submit the work */
-    k_work_submit_to_queue(&dect_mac_phy_handler_queue_work_queue ,&dect_mac_phy_handler_queue_work->work);
+    k_work_submit_to_queue(&dect_mac_phy_handler_queue_work_queue ,&dect_mac_phy_handler_queue_item->work);
 
     return 0;
 }
 
-void dect_mac_phy_queue_work_handler(struct k_work *work)
+void dect_mac_phy_handler_queue_put_thread(struct k_work *work)
 {
     /* get the context */
-    struct dect_mac_phy_handler_queue_work *work_context = CONTAINER_OF(work, struct dect_mac_phy_handler_queue_work, work);
+    struct dect_mac_phy_handler_queue_item *work_context = CONTAINER_OF(work, struct dect_mac_phy_handler_queue_item, work);
     enum dect_mac_phy_function function = work_context->function;
     union dect_mac_phy_handler_params params = work_context->params;
     uint32_t priority = work_context->priority;
@@ -63,9 +63,9 @@ void dect_mac_phy_queue_work_handler(struct k_work *work)
     k_mutex_lock(&queue_mutex, K_FOREVER);
     {
         /* create the item */
-        struct dect_mac_phy_handler_queue_item *item;
+        struct dect_mac_phy_handler_queue_node *item;
         LOG_DBG("Allocating memory for the queue item");
-        item = k_malloc(sizeof(struct dect_mac_phy_handler_queue_item)); // TODO: use memory pool instead of malloc
+        item = k_malloc(sizeof(struct dect_mac_phy_handler_queue_node)); // TODO: use memory pool instead of malloc
 
         /* check if the item was allocated */
         if (item == NULL)
@@ -103,9 +103,9 @@ void dect_mac_phy_queue_work_handler(struct k_work *work)
                  previous_node = node, node = sys_slist_peek_next(node))               // set the previous node to the current node and the current node to the next node
             { 
                 /* get the current item */
-                struct dect_mac_phy_handler_queue_item *current_item = CONTAINER_OF(node, struct dect_mac_phy_handler_queue_item, node);
+                struct dect_mac_phy_handler_queue_node *current_node = CONTAINER_OF(node, struct dect_mac_phy_handler_queue_node, node);
                 /* if the current item has a lower priority than the item to insert, insert the item before the current item */
-                if (current_item->priority < item->priority)
+                if (current_node->priority < item->priority)
                 {
                     sys_slist_insert(&dect_mac_phy_handler_queue, previous_node, &item->node);
                     item_inserted = true;
@@ -132,8 +132,8 @@ void dect_mac_phy_queue_work_handler(struct k_work *work)
 int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params)
 {
     /* saving the current operation in case of a failed operation */
-    current_item.function = function;
-    current_item.params = *params;
+    current_node.function = function;
+    current_node.params = *params;
 
     /* execute the operation */
     switch(function)
@@ -215,14 +215,14 @@ void dect_mac_phy_handler_queue_exec_thread()
         k_sem_take(&queue_item_sem, K_FOREVER);
         LOG_DBG("Got a new item in the queue");
 
-        struct dect_mac_phy_handler_queue_item local_item;
+        struct dect_mac_phy_handler_queue_node local_item;
 
         /* locks the list while working on it */
         k_mutex_lock(&queue_mutex, K_FOREVER);
         {
             /* get the first item in the list */
             sys_snode_t *node = sys_slist_get(&dect_mac_phy_handler_queue);
-            struct dect_mac_phy_handler_queue_item *item = CONTAINER_OF(node, struct dect_mac_phy_handler_queue_item, node);
+            struct dect_mac_phy_handler_queue_node *item = CONTAINER_OF(node, struct dect_mac_phy_handler_queue_node, node);
 
             /* copy the item on the stack */
             local_item = *item;
@@ -272,5 +272,5 @@ void dect_mac_phy_handler_queue_operation_failed_retry(struct k_timer *timer)
 
 void dect_mac_phy_handler_queue_timer_callback(struct k_timer *timer_id)
 {
-    dect_mac_phy_handler_queue_function_execute(current_item.function, &current_item.params);
+    dect_mac_phy_handler_queue_function_execute(current_node.function, &current_node.params);
 }

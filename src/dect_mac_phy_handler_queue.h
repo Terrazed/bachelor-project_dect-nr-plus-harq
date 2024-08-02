@@ -26,26 +26,25 @@ enum dect_mac_phy_handler_queue_priority{
     PRIORITY_CRITICAL = UINT32_MAX,
 };
 
-/* struct that represents an item in the queue */
+
 struct dect_mac_phy_handler_queue_item {
-    sys_snode_t node;
     enum dect_mac_phy_function function;
     union dect_mac_phy_handler_params params;
     enum dect_mac_phy_handler_queue_priority priority;
 };
 
-struct dect_mac_phy_handler_queue_work {
-    struct k_work work;
-    enum dect_mac_phy_function function;
-    union dect_mac_phy_handler_params params;
-    enum dect_mac_phy_handler_queue_priority priority;
+/* struct that represents an item in the queue */
+struct dect_mac_phy_handler_queue_node {
+    sys_snode_t node;
+    struct dect_mac_phy_handler_queue_item item;
 };
+
 
 /* function to put an operation in the waiting queue of the dect phy api */
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority);
 
 /* function that really puts the operation in the queue, this is done to handle putting an operation while being in an ISR */
-void dect_mac_phy_queue_work_handler(struct k_work *work);
+void dect_mac_phy_handler_queue_put_thread();
 
 /* function to execute an operation from the waiting queue of the dect phy api */
 int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
@@ -62,7 +61,7 @@ void dect_mac_phy_handler_queue_timer_callback(struct k_timer *timer_id);
 /* single linked list that to handle the planification of the phy layer actions (declared in dect_mac_phy_handler_queue.c) */
 extern sys_slist_t dect_mac_phy_handler_queue;
 
-extern struct dect_mac_phy_handler_queue_item current_item;
+extern struct dect_mac_phy_handler_queue_node current_node;
 
 /* semaphore that restrain access to the dect phy layer (declared in dect_mac_phy_handler_queue.c) */
 extern struct k_sem phy_layer_sem;
