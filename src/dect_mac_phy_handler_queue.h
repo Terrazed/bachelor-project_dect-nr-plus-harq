@@ -11,7 +11,7 @@
 #define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 2048
 
 /* maximum number of item that the queue can contains */
-#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 32
+#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 8
 
 /* maximum number of retry before giving up on an operation */
 #define DECT_MAC_PHY_HANDLER_QUEUE_MAX_RETRY 10
@@ -81,5 +81,10 @@ extern uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
 /* work that is used to schedule the execution of an operation */
 extern struct k_msgq dect_mac_phy_handler_queue_msgq;
 
+/* memory slab for putting the items */
+extern struct k_mem_slab dect_mac_phy_handler_queue_item_slab;
+
+/* memory slab for puttin the nodes */
+extern struct k_mem_slab dect_mac_phy_handler_queue_node_slab;
 
 #endif // DECT_MAC_PHY_HANDLER_QUEUE_H

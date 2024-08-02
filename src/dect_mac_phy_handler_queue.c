@@ -11,6 +11,9 @@ K_TIMER_DEFINE(dect_mac_phy_handler_queue_operation_failed_timer, dect_mac_phy_h
 K_THREAD_DEFINE(dect_phy_queue_handler_put_thread_id, DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE, dect_mac_phy_handler_queue_put_thread, NULL, NULL, NULL, 9, 0, 0);
 K_MSGQ_DEFINE(dect_mac_phy_handler_queue_msgq, sizeof(struct dect_mac_phy_handler_queue_item *), DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS, 1);
 
+K_MEM_SLAB_DEFINE(dect_mac_phy_handler_queue_item_slab, sizeof(struct dect_mac_phy_handler_queue_item), DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS, 1);
+K_MEM_SLAB_DEFINE(dect_mac_phy_handler_queue_node_slab, sizeof(struct dect_mac_phy_handler_queue_node), DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS, 1);
+
 sys_slist_t dect_mac_phy_handler_queue = SYS_SLIST_STATIC_INIT(&dect_mac_phy_handler_queue);
 struct dect_mac_phy_handler_queue_node current_node = {0};
 uint32_t dect_mac_phy_handler_queue_operation_failed_counter = 0;
@@ -20,8 +23,9 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
 {
 
     /* create the work */
-    struct dect_mac_phy_handler_queue_item *dect_mac_phy_handler_queue_item = k_malloc(sizeof(struct dect_mac_phy_handler_queue_item)); // TODO: use memory pool instead of malloc
-    if (dect_mac_phy_handler_queue_item == NULL)
+    struct dect_mac_phy_handler_queue_item *dect_mac_phy_handler_queue_item = NULL;
+    int ret = k_mem_slab_alloc(&dect_mac_phy_handler_queue_item_slab, &dect_mac_phy_handler_queue_item, K_NO_WAIT);
+    if (ret)
     {
         LOG_ERR("Failed to allocate memory for the work");
         return -1; // TODO: return a proper error code
@@ -42,7 +46,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     LOG_DBG("item: %p, function: %d, params: %x, priority: %u", dect_mac_phy_handler_queue_item, function, params, priority);
 
     /* submit the request */
-    int ret = k_msgq_put(&dect_mac_phy_handler_queue_msgq, &dect_mac_phy_handler_queue_item, K_FOREVER);
+    ret = k_msgq_put(&dect_mac_phy_handler_queue_msgq, &dect_mac_phy_handler_queue_item, K_FOREVER);
     if (ret)
     {
         LOG_ERR("Failed to put the item in the queue");
@@ -70,7 +74,7 @@ void dect_mac_phy_handler_queue_put_thread(struct k_work *work)
         uint32_t priority = dect_mac_phy_handler_queue_item->priority;
 
         /* free the item */
-        k_free(dect_mac_phy_handler_queue_item); // TODO: use memory pool instead of free
+        k_mem_slab_free(&dect_mac_phy_handler_queue_item_slab, dect_mac_phy_handler_queue_item);
 
         /* add the item to the queue */
         LOG_DBG("Adding item to the queue - function: %d, priority: %u", function, priority);
@@ -79,12 +83,12 @@ void dect_mac_phy_handler_queue_put_thread(struct k_work *work)
         k_mutex_lock(&queue_mutex, K_FOREVER);
         {
             /* create the node */
-            struct dect_mac_phy_handler_queue_node *node;
+            struct dect_mac_phy_handler_queue_node *node = NULL;
             LOG_DBG("Allocating memory for the queue item");
-            node = k_malloc(sizeof(struct dect_mac_phy_handler_queue_node)); // TODO: use memory pool instead of malloc
 
-            /* check if the node was allocated */
-            if (node == NULL)
+            /* allocate the memory for the node */
+            int ret = k_mem_slab_alloc(&dect_mac_phy_handler_queue_node_slab, &node, K_NO_WAIT);
+            if (ret)
             {
                 LOG_ERR("Failed to allocate memory for the queue item");
                 return;
@@ -242,7 +246,7 @@ void dect_mac_phy_handler_queue_exec_thread()
             }
             else // free the item if it is not permanent
             {
-                k_free(node); // TODO: use memory pool instead of free
+                k_mem_slab_free(&dect_mac_phy_handler_queue_node_slab, node);
             }
 
             LOG_DBG("Got item from the queue - function: %d, priority: %d", local_node.item.function, local_node.item.priority);
