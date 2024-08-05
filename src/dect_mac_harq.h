@@ -60,6 +60,8 @@ void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *ha
 /* function that gets the buffer status from the harq process number */
 uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number);
 
+/* function that removes space in the buffer */
+int dect_mac_harq_remove_buffer_space(uint32_t process_number, uint8_t byte_count);
 
 
 
