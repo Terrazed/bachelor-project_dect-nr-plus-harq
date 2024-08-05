@@ -164,10 +164,6 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
     /* setting the handle back to the good handle */
     true_params.handle = ((TX_HARQ << 28) | (params.handle & 0x0fffffff));
 
-    /* indicating current state */
-    // current_state = GETTING_CAPABILITY
-    // TODO: see what to do here ^
-
     /* start the transmission */
     int ret = nrf_modem_dect_phy_tx_harq(&true_params);
     if (ret)

@@ -34,6 +34,7 @@ enum dect_mac_phy_state
 	STOPPING_RECEPTION = 7,
 	CONFIGURING_LINK = 8,
 	GETTING_TIME = 9,
+	UNKNOWN = 10, // this can be the result of a placeholder called
 };
 
 /* struct that represents the capabilities of the modem. */
