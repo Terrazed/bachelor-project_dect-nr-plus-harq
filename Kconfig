@@ -62,4 +62,11 @@ config HARQ_RX_WAITING_TIME_MS
 	help
 		Waiting time in ms before consedering the transmission has not reached the target. After this time, a retransmission is triggered.
 
+config HARQ_PROCESS_COUNT
+	int "HARQ process count"
+	range 1 8
+	default 4
+	help
+		Number of HARQ processes to use. can be 1, 2, 4 or 8. the buffer memory is divided by this number. so the more processes, the less memory per process.
+
 endmenu

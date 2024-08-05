@@ -87,7 +87,7 @@ void dect_mac_phy_handler_init()
     /* create init parameters */
     const struct nrf_modem_dect_phy_init_params params = {
         .harq_rx_expiry_time_us = CONFIG_HARQ_RX_EXPIRY_TIME_US,
-        .harq_rx_process_count = 4,
+        .harq_rx_process_count = CONFIG_HARQ_PROCESS_COUNT,
     };
 
     /* initialize the dect phy modem */
