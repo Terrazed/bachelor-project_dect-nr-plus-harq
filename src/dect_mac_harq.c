@@ -89,7 +89,6 @@ int dect_mac_harq_transmit(struct dect_mac_harq_transmit_params params)
             .redundancy_version = harq_process->redundancy_version,
             .new_data_indication = harq_process->new_data_indication,
             .harq_process_nr = harq_process->process_number,
-            .buffer_size = 0, // TODO: buffer size
         },
         .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
         .rx_period_ms = CONFIG_HARQ_RX_WAITING_TIME_MS,
@@ -141,7 +140,6 @@ int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process)
             .redundancy_version = harq_process->redundancy_version,
             .new_data_indication = harq_process->new_data_indication,
             .harq_process_nr = harq_process->process_number,
-            .buffer_size = 0, // TODO: buffer size
         },
         .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
         .rx_period_ms = CONFIG_HARQ_RX_WAITING_TIME_MS,
