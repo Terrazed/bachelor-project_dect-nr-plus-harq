@@ -37,7 +37,7 @@ void button1_pressed(){
 void button2_pressed(){
 
     static uint8_t data[700];
-    data_len = sprintf(data, "this message is %d bytes long", data_len);
+    sprintf(data, "this message is %d bytes long", data_len);
 
     struct dect_mac_harq_transmit_params params = {
         .data = data,
@@ -59,11 +59,19 @@ static uint8_t radio_mode = 0;
 
 void button3_pressed(){
     data_len += 20;
+    if(data_len > 700)
+    {
+        data_len = 0;
+    }
     LOG_WRN("Data length increased to %d", data_len);
 }
 
 void button4_pressed(){
     data_len -= 20;
+    if(data_len > 700)
+    {
+        data_len = 700;
+    }
     LOG_WRN("Data length decreased to %d", data_len);
 }
 
