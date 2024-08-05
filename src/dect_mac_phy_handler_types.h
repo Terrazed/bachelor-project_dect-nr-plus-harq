@@ -247,6 +247,7 @@ enum nrf_mac_feedback_format
 	FEEDBACK_FORMAT_3 = 3,
 	FEEDBACK_FORMAT_4 = 4,
 	FEEDBACK_FORMAT_5 = 5,
+	FEEDBACK_FORMAT_6 = 6,
 };
 
 #endif // DEC_MAC_PHY_HANDLER_TYPES_H
