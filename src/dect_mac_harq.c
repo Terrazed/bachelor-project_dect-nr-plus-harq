@@ -50,7 +50,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
         .data_size = 0,
         .receiver_id = header->transmitter_id_hi << 8 | header->transmitter_id_lo,
         .feedback = feedback,
-        .start_time = start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
+        .start_time = start_time + ((3+packet_length) * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000),
     };
 
     /* send the acknoledgement */
