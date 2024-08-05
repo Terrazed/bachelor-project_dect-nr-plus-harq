@@ -12,15 +12,11 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main, 4);
 
+static uint16_t data_len = 0;
 
 void button1_pressed(){
-    dk_set_led(DK_LED1, 1);
-    k_sleep(K_MSEC(200));
-    dk_set_led(DK_LED1, 0);
-
     static uint8_t data[700];
-    static uint16_t data_len;
-    data_len = sprintf(data, "Hello Worldi 123456789016780167890123456789012345678901234567890123456789012345678901234567890678901234567890123456789012345678901234567890123456789012345678901234567890123dsafasdfsadfsadfasdfasdfasdfasdfasdfsadf45678906789012345678901234567890123456345678901234567890123456789012345678901234567890123456789012345678901test");
+    sprintf(data, "this message is %d bytes long", data_len);
 
     struct dect_mac_harq_transmit_params params = {
         .data = data,
@@ -39,13 +35,9 @@ void button1_pressed(){
 }
 
 void button2_pressed(){
-    dk_set_led(DK_LED2, 1);
-    k_sleep(K_MSEC(200));
-    dk_set_led(DK_LED2, 0);
 
     static uint8_t data[700];
-    static uint16_t data_len;
-    data_len = sprintf(data, "Hello Worldo");
+    data_len = sprintf(data, "this message is %d bytes long", data_len);
 
     struct dect_mac_harq_transmit_params params = {
         .data = data,
@@ -66,40 +58,13 @@ void button2_pressed(){
 static uint8_t radio_mode = 0;
 
 void button3_pressed(){
-    dk_set_led(DK_LED3, 1);
-    k_sleep(K_MSEC(200));
-    dk_set_led(DK_LED3, 0);
-
-    radio_mode = (radio_mode + 1)%3;
-
-    struct dect_mac_phy_handler_radio_config_params radio_params = {
-        .handle = 0x187,
-        .radio_mode = radio_mode,
-        .start_time = 0,
-    };
-
-    dect_phy_queue_put(RADIO_CONFIG, (union dect_mac_phy_handler_params*)&radio_params, PRIORITY_HIGH);
-
-    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
-        .handle = 0x48000014,
-    };
-
-    dect_mac_phy_handler_cancel(rx_stop_params);
+    data_len += 20;
+    LOG_WRN("Data length increased to %d", data_len);
 }
 
 void button4_pressed(){
-    dk_set_led(DK_LED4, 1);
-    k_sleep(K_MSEC(200));
-    dk_set_led(DK_LED4, 0);
-
-    struct dect_mac_phy_handler_rx_params rx_params = {
-        .handle = 0x14,
-        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
-        .rx_period_ms = 10000,
-        .receiver_identity = 0,
-        .start_time = 0,
-    };
-    dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_HIGH);    
+    data_len -= 20;
+    LOG_WRN("Data length decreased to %d", data_len);
 }
 
 void button_handler(uint32_t button_state, uint32_t has_changed)
@@ -109,6 +74,9 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
     case DK_BTN1_MSK:
         if (button_state & DK_BTN1_MSK)
         {
+            dk_set_led(DK_LED1, 1);
+            k_sleep(K_MSEC(200));
+            dk_set_led(DK_LED1, 0);
             LOG_INF("Button 1 pressed");
             button1_pressed();
         }
@@ -116,6 +84,9 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
     case DK_BTN2_MSK:
         if (button_state & DK_BTN2_MSK)
         {
+            dk_set_led(DK_LED2, 1);
+            k_sleep(K_MSEC(200));
+            dk_set_led(DK_LED2, 0);
             LOG_INF("Button 2 pressed");
             button2_pressed();
         }
@@ -123,6 +94,9 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
     case DK_BTN3_MSK:
         if (button_state & DK_BTN3_MSK)
         {
+            dk_set_led(DK_LED3, 1);
+            k_sleep(K_MSEC(200));
+            dk_set_led(DK_LED3, 0);
             LOG_INF("Button 3 pressed");
             button3_pressed();
         }
@@ -130,6 +104,9 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
     case DK_BTN4_MSK:
         if (button_state & DK_BTN4_MSK)
         {
+            dk_set_led(DK_LED4, 1);
+            k_sleep(K_MSEC(200));
+            dk_set_led(DK_LED4, 0);
             LOG_INF("Button 4 pressed");
             button4_pressed();
         }
