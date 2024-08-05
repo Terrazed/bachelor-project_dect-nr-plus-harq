@@ -255,6 +255,23 @@ uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number)
 }
 
 int dect_mac_harq_remove_buffer_space(uint32_t process_number, uint8_t byte_count){
+    if(process_number >= CONFIG_HARQ_PROCESS_COUNT)
+    {
+        LOG_ERR("Invalid process number");
+        return INVALID_PROCESS_NUMBER;
+    }
+    if(harq_processes[process_number].buffer_size < byte_count)
+    {
+        LOG_ERR("Not enough space in the buffer");
+        return BUFFER_TOO_SMALL;
+    }
+    else
+    {
+        harq_processes[process_number].buffer_size -= byte_count;
+        return OK;
+    }
+}
+
 struct dect_mac_harq_process * dect_mac_harq_take_process()
 {
     /* initialize if not already initialized */
