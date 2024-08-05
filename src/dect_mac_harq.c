@@ -12,6 +12,33 @@ struct k_work_q dect_mac_harq_work_queue;
 
 int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t start_time)
 {
+    /* get packet length */
+    uint8_t packet_length = header->packet_length;
+    uint16_t packet_length_bytes = dect_mac_utils_get_bytes_from_packet_length(packet_length, header->df_mcs);
+
+    /* remove buffer size */
+    dect_mac_harq_remove_buffer_space(header->df_harq_process_nr, packet_length_bytes);
+    
+    /* set the feedback */
+    struct feedback feedback;
+
+    if(packet_length_bytes > capabilities.harq_soft_buf_size/CONFIG_HARQ_PROCESS_COUNT){
+        LOG_ERR("Packet length bigger than buffer size");
+        feedback.format = FEEDBACK_FORMAT_6;
+        feedback.info.format_6.harq_process_number = header->df_harq_process_nr;
+        feedback.info.format_6.channel_quality_indicator = dect_mac_node_get_cqi(header->transmitter_id_hi << 8 | header->transmitter_id_lo);
+        feedback.info.format_6.buffer_status = dect_mac_harq_get_buffer_status(header->df_harq_process_nr);
+        feedback.info.format_6.reserved = 0;
+    }
+    else
+    {
+        feedback.format = FEEDBACK_FORMAT_1;
+        feedback.info.format_1.channel_quality_indicator = dect_mac_node_get_cqi(header->transmitter_id_hi << 8 | header->transmitter_id_lo);
+        feedback.info.format_1.transmission_feedback = NACK; // this will be changed to ACK by the phy layer if the PDC crc is correct
+        feedback.info.format_1.harq_process_number = header->df_harq_process_nr;
+        feedback.info.format_1.buffer_status = dect_mac_harq_get_buffer_status(header->df_harq_process_nr);
+    }
+
     /* config the operation */
     struct dect_mac_phy_handler_tx_harq_params params = {
         .handle = (HANDLE_HARQ + header->df_harq_process_nr) | (1<<27),
@@ -19,15 +46,14 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
         .data = NULL,
         .data_size = 0,
         .receiver_id = header->transmitter_id_hi << 8 | header->transmitter_id_lo,
-        .buffer_status = dect_mac_harq_get_buffer_status(header->df_harq_process_nr),
-        .channel_quality_indicator = dect_mac_node_get_cqi(header->transmitter_id_hi << 8 | header->transmitter_id_lo),
-        .harq_process_number = header->df_harq_process_nr,
+        .feedback = feedback,
         .start_time = start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
     };
 
     /* send the acknoledgement */
     dect_mac_phy_handler_tx_harq(params);
-    dect_phy_queue_put(PLACEHOLDER, NO_PARAMS, PRIORITY_CRITICAL);
+    int ret = dect_phy_queue_put(PLACEHOLDER, NO_PARAMS, PRIORITY_CRITICAL);
+    return ret;
 }
 
 void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
