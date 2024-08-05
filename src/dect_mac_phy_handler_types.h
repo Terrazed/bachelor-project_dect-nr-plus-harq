@@ -96,7 +96,6 @@ struct harq_tx_params
 	uint32_t redundancy_version : 2;
 	uint32_t new_data_indication : 1;
 	uint32_t harq_process_nr : 3;
-	uint32_t buffer_size : 4; // buffer size in bytes
 };
 
 /* enumerate the different usage of the tx function */

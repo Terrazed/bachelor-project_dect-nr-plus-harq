@@ -19,7 +19,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
         .data = NULL,
         .data_size = 0,
         .receiver_id = header->transmitter_id_hi << 8 | header->transmitter_id_lo,
-        .buffer_status = 0xf, // TODO: buffer status
+        .buffer_status = dect_mac_harq_get_buffer_status(header->df_harq_process_nr),
         .channel_quality_indicator = dect_mac_node_get_cqi(header->transmitter_id_hi << 8 | header->transmitter_id_lo),
         .harq_process_number = header->df_harq_process_nr,
         .start_time = start_time + (10 * 10000/24 * NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ / 1000), // TODO: check this
@@ -175,6 +175,87 @@ void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *ha
     }
 }
 
+uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number)
+{
+    if(process_number >= HARQ_PROCESS_MAX)
+    {
+        LOG_ERR("Invalid process number");
+        return 0;
+    }
+    else
+    {
+        uint8_t buffer_status;
+        uint32_t process_buffer_size = harq_processes[process_number].buffer_size;
+
+        if(process_buffer_size == 0)
+        {
+            buffer_status = 0;
+        }
+        else if(process_buffer_size <= 16)
+        {
+            buffer_status = 0x1;
+        }
+        else if(process_buffer_size <= 32)
+        {
+            buffer_status = 0x2;
+        }
+        else if(process_buffer_size <= 64)
+        {
+            buffer_status = 0x3;
+        }
+        else if(process_buffer_size <= 128)
+        {
+            buffer_status = 0x4;
+        }
+        else if(process_buffer_size <= 256)
+        {
+            buffer_status = 0x5;
+        }
+        else if(process_buffer_size <= 512)
+        {
+            buffer_status = 0x6;
+        }
+        else if(process_buffer_size <= 1024)
+        {
+            buffer_status = 0x7;
+        }
+        else if(process_buffer_size <= 2048)
+        {
+            buffer_status = 0x8;
+        }
+        else if(process_buffer_size <= 4096)
+        {
+            buffer_status = 0x9;
+        }
+        else if(process_buffer_size <= 8192)
+        {
+            buffer_status = 0xa;
+        }
+        else if(process_buffer_size <= 16384)
+        {
+            buffer_status = 0xb;
+        }
+        else if(process_buffer_size <= 32768)
+        {
+            buffer_status = 0xc;
+        }
+        else if(process_buffer_size <= 65536)
+        {
+            buffer_status = 0xd;
+        }
+        else if(process_buffer_size <= 131072)
+        {
+            buffer_status = 0xe;
+        }
+        else
+        {
+            buffer_status = 0xf;
+        }
+
+        return buffer_status;
+    }
+}
+
 struct dect_mac_harq_process * dect_mac_harq_take_process()
 {
     /* initialize if not already initialized */
@@ -223,6 +304,7 @@ void dect_mac_harq_init_process(struct dect_mac_harq_process *harq_process, uint
     harq_process->receiver_id = 0;
     harq_process->transmission_count = 0;
     harq_process->redundancy_version = 0;
+    harq_process->buffer_size = capabilities.harq_soft_buf_size/CONFIG_HARQ_PROCESS_COUNT;
 }
 
 void dect_mac_harq_initialize()

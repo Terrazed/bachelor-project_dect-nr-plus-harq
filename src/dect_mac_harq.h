@@ -26,6 +26,7 @@ struct dect_mac_harq_process {
     uint8_t redundancy_version;
     uint8_t new_data_indication;
     struct k_work_delayable retransmission_work;
+    uint32_t buffer_size;
 };
 
 
@@ -56,7 +57,8 @@ int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process);
 /* function to increment the redundancy version of a harq process */
 void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *harq_process);
 
-
+/* function that gets the buffer status from the harq process number */
+uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number);
 
 
 
