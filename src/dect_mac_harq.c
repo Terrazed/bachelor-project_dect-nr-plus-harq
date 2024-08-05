@@ -12,6 +12,9 @@ struct k_work_q dect_mac_harq_work_queue;
 
 int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t start_time)
 {
+    /* initialize if not already initialized */
+    dect_mac_harq_init_process(&harq_processes[header->df_harq_process_nr], header->df_harq_process_nr); // initialize the process
+
     /* get packet length */
     uint8_t packet_length = header->packet_length;
     uint16_t packet_length_bytes = dect_mac_utils_get_bytes_from_packet_length(packet_length, header->df_mcs);
@@ -22,7 +25,7 @@ int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t s
     /* set the feedback */
     struct feedback feedback;
 
-    if(packet_length_bytes > capabilities.harq_soft_buf_size/CONFIG_HARQ_PROCESS_COUNT){
+    if(packet_length_bytes > capabilities.harq_soft_buf_size/8/CONFIG_HARQ_PROCESS_COUNT){
         LOG_ERR("Packet length bigger than buffer size");
         feedback.format = FEEDBACK_FORMAT_6;
         feedback.info.format_6.harq_process_number = header->df_harq_process_nr;
@@ -77,14 +80,14 @@ void dect_mac_harq_response(struct phy_ctrl_field_common_type2 *header)
         } else {
             LOG_WRN("NACK received for harq process %d", feedback.format_1.harq_process_number);
             dect_mac_harq_increment_redundancy_version(harq_process);
-            int ret = k_work_reschedule_for_queue(&dect_mac_harq_work_queue, &harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
+            k_work_reschedule_for_queue(&dect_mac_harq_work_queue, &harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
         }
     }
     else if(format == FEEDBACK_FORMAT_6)
     {
-        LOG_WRN("NACK received for harq process %d and buffer not big enough", feedback.format_1.harq_process_number);
+        LOG_WRN("NACK received for harq process %d and buffer not big enough", feedback.format_6.harq_process_number);
         harq_process->redundancy_version = 0; // the other device can't store the data, so we reset the redundancy version to send the full data
-        int ret = k_work_reschedule_for_queue(&dect_mac_harq_work_queue, &harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
+        k_work_reschedule_for_queue(&dect_mac_harq_work_queue, &harq_process->retransmission_work, K_NO_WAIT); // schedule the retransmission work
     }
 
     
@@ -356,7 +359,7 @@ void dect_mac_harq_init_process(struct dect_mac_harq_process *harq_process, uint
     harq_process->receiver_id = 0;
     harq_process->transmission_count = 0;
     harq_process->redundancy_version = 0;
-    harq_process->buffer_size = capabilities.harq_soft_buf_size/CONFIG_HARQ_PROCESS_COUNT;
+    harq_process->buffer_size = capabilities.harq_soft_buf_size/8/CONFIG_HARQ_PROCESS_COUNT;
 }
 
 void dect_mac_harq_initialize()
