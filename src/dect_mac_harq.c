@@ -5,8 +5,8 @@ LOG_MODULE_REGISTER(harq, 3);
 
 K_THREAD_STACK_DEFINE(dect_mac_harq_work_queue_stack, DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE);
 
-bool harq_process_occupied[HARQ_PROCESS_MAX] = {0};
-struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX] = {0};
+bool harq_process_occupied[CONFIG_HARQ_PROCESS_COUNT] = {0};
+struct dect_mac_harq_process harq_processes[CONFIG_HARQ_PROCESS_COUNT] = {0};
 bool dect_mac_harq_initialized = false;
 struct k_work_q dect_mac_harq_work_queue;
 
@@ -175,7 +175,7 @@ void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *ha
 
 uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number)
 {
-    if(process_number >= HARQ_PROCESS_MAX)
+    if(process_number >= CONFIG_HARQ_PROCESS_COUNT)
     {
         LOG_ERR("Invalid process number");
         return 0;
@@ -263,7 +263,7 @@ struct dect_mac_harq_process * dect_mac_harq_take_process()
     }
 
     /* loop through all processes */
-    for(int i = 0; i < HARQ_PROCESS_MAX; i++){
+    for(int i = 0; i < CONFIG_HARQ_PROCESS_COUNT; i++){
         if(!harq_process_occupied[i]){ // find a free process
             harq_process_occupied[i] = true; // set the process as occupied
             harq_processes[i].new_data_indication = !harq_processes[i].new_data_indication; // toggle the new data indication
@@ -315,7 +315,7 @@ void dect_mac_harq_initialize()
         k_work_queue_start(&dect_mac_harq_work_queue, dect_mac_harq_work_queue_stack, K_THREAD_STACK_SIZEOF(dect_mac_harq_work_queue_stack), 8, NULL);
 
         /* loop through all processes */
-        for (int i = 0; i < HARQ_PROCESS_MAX; i++)
+        for (int i = 0; i < CONFIG_HARQ_PROCESS_COUNT; i++)
         {
             dect_mac_harq_init_process(&harq_processes[i], i); // initialize the process
             harq_process_occupied[i] = false; // set the process as free
