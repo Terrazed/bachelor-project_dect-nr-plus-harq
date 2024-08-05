@@ -11,7 +11,6 @@
 
 #define DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE 1024
 
-#define HARQ_PROCESS_MAX 4
 #define HANDLE_HARQ 0xA0
 #define ACK 1
 #define NACK 0
@@ -81,10 +80,10 @@ void dect_mac_harq_initialize();
 extern bool dect_mac_harq_initialized;
 
 /* array of the free harq processes */
-extern bool harq_process_occupied[HARQ_PROCESS_MAX];
+extern bool harq_process_occupied[CONFIG_HARQ_PROCESS_COUNT];
 
 /* array of the harq processes */
-extern struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX];
+extern struct dect_mac_harq_process harq_processes[CONFIG_HARQ_PROCESS_COUNT];
 
 /* work queue that is used to schedule the execution of a retransmission */
 extern struct k_work_q dect_mac_harq_work_queue;
