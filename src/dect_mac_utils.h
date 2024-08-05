@@ -4,6 +4,8 @@
 #include <zephyr/kernel.h>
 #include <nrf_modem_dect_phy.h>
 
+#include "dect_mac_error_code.h"
+
 /* function to get the modem time faster than with the modem call (taken from fmac)*/
 uint64_t dect_mac_utils_modem_time_now(void);
 

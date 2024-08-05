@@ -6,6 +6,7 @@
 
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler.h"
+#include "dect_mac_error_code.h"
 
 /* stack size in bytes of the thread that reads the list */
 #define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 2048
