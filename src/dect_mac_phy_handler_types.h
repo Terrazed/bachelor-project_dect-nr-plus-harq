@@ -138,7 +138,6 @@ struct dect_mac_phy_handler_tx_harq_params
 	uint64_t start_time;
 };
 
-
 struct dect_mac_phy_handler_tx_rx_params
 {
 	uint32_t handle : 28;
@@ -177,19 +176,19 @@ union dect_mac_phy_handler_params
 	struct dect_mac_phy_handler_rx_stop_params rx_stop_params;
 };
 
-#define NO_PARAMS (union dect_mac_phy_handler_params*) NULL
-#define DECT_MAC_PHY_HANDLER_NO_FEEDBACK 	\ 	
-	{										\
-		.format = NO_FEEDBACK,				\
-		.info = {							\
-			.raw = 0,						\
-		}									\
+#define NO_PARAMS (union dect_mac_phy_handler_params *)NULL
+#define DECT_MAC_PHY_HANDLER_NO_FEEDBACK \
+	{                                    \
+		.format = NO_FEEDBACK,           \
+		.info = {                        \
+			.raw = 0,                    \
+		}                                \
 	}
-#define DECT_MAC_PHY_HANDLER_NO_HARQ 	\
-	{									\
-		.redundancy_version = 0,		\
-		.new_data_indication = 0,		\
-		.harq_process_nr = 0,			\
+#define DECT_MAC_PHY_HANDLER_NO_HARQ \
+	{                                \
+		.redundancy_version = 0,     \
+		.new_data_indication = 0,    \
+		.harq_process_nr = 0,        \
 	}
 
 /* Header type 1, due to endianness the order is different than in the specification. */

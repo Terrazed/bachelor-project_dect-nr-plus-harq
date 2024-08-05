@@ -394,7 +394,7 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
         }
 
         /* compute wanted power output */
-        int8_t power_margin = CONFIG_TX_POWER_MARGIN_DBM;                                              // offset to ensure good communication
+        int8_t power_margin = CONFIG_TX_POWER_MARGIN_DBM; // offset to ensure good communication
         int wanted_tx_power_dbm = received_tx_power_dbm - (rssi2 - CONFIG_RSSI_TARGET - power_margin); // set tx power to rssi2
         LOG_DBG("wanted_tx_power_dbm: %d", wanted_tx_power_dbm);
 

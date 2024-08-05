@@ -19,7 +19,8 @@
 
 #define DECT_MAC_PHY_HANDLER_QUEUE_RETRY_DELAY K_MSEC(10)
 
-enum dect_mac_phy_handler_queue_priority{
+enum dect_mac_phy_handler_queue_priority
+{
     PRIORITY_PERMANENT = 0,
     PRIORITY_LOW = 10000,
     PRIORITY_MEDIUM = 20000,
@@ -27,19 +28,19 @@ enum dect_mac_phy_handler_queue_priority{
     PRIORITY_CRITICAL = UINT32_MAX,
 };
 
-
-struct dect_mac_phy_handler_queue_item {
+struct dect_mac_phy_handler_queue_item
+{
     enum dect_mac_phy_function function;
     union dect_mac_phy_handler_params params;
     enum dect_mac_phy_handler_queue_priority priority;
 };
 
 /* struct that represents an item in the queue */
-struct dect_mac_phy_handler_queue_node {
+struct dect_mac_phy_handler_queue_node
+{
     sys_snode_t node;
     struct dect_mac_phy_handler_queue_item item;
 };
-
 
 /* function to put an operation in the waiting queue of the dect phy api */
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority);
