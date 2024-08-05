@@ -16,9 +16,10 @@
 #define NACK 0
 
 /* struct that represent a harq process */
-struct dect_mac_harq_process {
+struct dect_mac_harq_process
+{
     uint32_t process_number;
-    void* data;
+    void *data;
     size_t data_len;
     uint32_t receiver_id;
     uint8_t transmission_count;
@@ -28,15 +29,14 @@ struct dect_mac_harq_process {
     uint32_t buffer_size;
 };
 
-
 /* struct that contains all the needed parameters to transmit a harq message */
-struct dect_mac_harq_transmit_params {
+struct dect_mac_harq_transmit_params
+{
     void *data;
     size_t data_len;
     uint64_t start_time;
     uint32_t receiver_id;
 };
-
 
 /* function to handle the harq request (sending an acknowledgement)*/
 int dect_mac_harq_request(struct phy_ctrl_field_common_type2 *header, uint64_t start_time);
@@ -62,10 +62,8 @@ uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number);
 /* function that removes space in the buffer */
 int dect_mac_harq_remove_buffer_space(uint32_t process_number, uint8_t byte_count);
 
-
-
 /* function to get an avaiable harq process */
-struct dect_mac_harq_process * dect_mac_harq_take_process();
+struct dect_mac_harq_process *dect_mac_harq_take_process();
 
 /* function to give back a harq process */
 void dect_mac_harq_give_process(struct dect_mac_harq_process *harq_process);
@@ -87,6 +85,5 @@ extern struct dect_mac_harq_process harq_processes[CONFIG_HARQ_PROCESS_COUNT];
 
 /* work queue that is used to schedule the execution of a retransmission */
 extern struct k_work_q dect_mac_harq_work_queue;
-
 
 #endif // DECT_MAC_HARQ_H

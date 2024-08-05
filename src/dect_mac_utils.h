@@ -17,6 +17,4 @@ int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t 
 
 uint16_t dect_mac_utils_get_bytes_from_packet_length(uint32_t packet_length, uint32_t mcs);
 
-
-
 #endif // DECT_MAC_UTILS_H

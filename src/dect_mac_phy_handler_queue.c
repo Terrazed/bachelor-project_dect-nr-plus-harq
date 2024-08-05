@@ -204,6 +204,8 @@ int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function funct
         dect_mac_phy_handler_time_get();
         break;
     case PLACEHOLDER:
+        LOG_DBG("placeholder");
+        current_state = UNKNOWN;
         break;
     default:
         LOG_ERR("Unknown function: %d", function);
