@@ -60,27 +60,17 @@ union feedback_info
 		uint32_t transmission_feedback : 1;
 		uint32_t harq_process_number : 3;
 		uint32_t pad : 4;
-		uint32_t buffer_status : 4;
 		uint32_t channel_quality_indicator : 4;
+		uint32_t buffer_status : 4;
 	} format_1;
-	struct mac_feedback_info_format_2
+	struct mac_feedbaack_info_format_6
 	{
-		uint32_t channel_quality_indicator : 4;
+		uint32_t reserved : 1;
+		uint32_t harq_process_number : 3;
 		uint32_t pad : 4;
-		uint32_t codebook_index : 3;
-		uint32_t mimo_feedback : 1;
+		uint32_t channel_quality_indicator : 4;
 		uint32_t buffer_status : 4;
-	} format_2;
-	struct mac_feedback_info_format_3
-	{
-		uint32_t transmission_feedback_transmitter : 1;
-		uint32_t harq_process_number_transmitter : 3;
-		uint32_t pad : 4;
-		uint32_t channel_quality_indicator : 4;
-		uint32_t transmission_feedback_receiver : 1;
-		uint32_t harq_process_number_receiver : 3;
-
-	} format_3;
+	} format_6;
 	struct mac_feedback_byte
 	{
 		uint32_t hi : 4;
