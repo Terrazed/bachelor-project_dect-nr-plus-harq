@@ -191,7 +191,6 @@ union dect_mac_phy_handler_params
 		.redundancy_version = 0,		\
 		.new_data_indication = 0,		\
 		.harq_process_nr = 0,			\
-		.buffer_size = 0,				\
 	}
 
 /* Header type 1, due to endianness the order is different than in the specification. */
