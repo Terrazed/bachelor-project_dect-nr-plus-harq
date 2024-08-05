@@ -34,15 +34,15 @@ void dect_mac_utils_modem_time_save(uint64_t const *time)
 	}
 }
 
-int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t *packet_length_type, uint32_t *packet_length){
+static const int16_t byte_per_mcs_and_length[5][16] = {
+    {0,17,33,50,67,83,99,115,133,149,165,181,197,213,233,249},
+    {4,37,69,103,137,169,201,233,263,295,327,359,391,423,463,495},
+    {7,57,107,157,205,253,295,343,399,447,495,540,596,644,692,-1},
+    {11,77,141,209,271,335,399,463,532,596,660,-1,-1,-1,-1,-1,},
+    {18,117,217,311,407,503,604,700,-1,-1,-1,-1,-1,-1,-1,-1}
+};
 
-    static const int16_t byte_per_mcs_and_length[5][16] = {
-        {0,17,33,50,67,83,99,115,133,149,165,181,197,213,233,249},
-        {4,37,69,103,137,169,201,233,263,295,327,359,391,423,463,495},
-        {7,57,107,157,205,253,295,343,399,447,495,540,596,644,692,-1},
-        {11,77,141,209,271,335,399,463,532,596,660,-1,-1,-1,-1,-1,},
-        {18,117,217,311,407,503,604,700,-1,-1,-1,-1,-1,-1,-1,-1}
-    };
+int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t *packet_length_type, uint32_t *packet_length){
 
     *packet_length_type = 0;
 
@@ -60,4 +60,14 @@ int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t 
     return found?OK:PACKET_TOO_BIG; // return 0 if found, -1 if not found
 
 
+}
+
+
+uint16_t dect_mac_utils_get_bytes_from_packet_length(uint32_t packet_length, uint32_t mcs)
+{
+    if(mcs > 4 || packet_length > 15){
+        LOG_ERR("Invalid MCS or packet length");
+        return 0;
+    }
+    return byte_per_mcs_and_length[mcs][packet_length];
 }

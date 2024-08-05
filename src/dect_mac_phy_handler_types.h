@@ -60,27 +60,17 @@ union feedback_info
 		uint32_t transmission_feedback : 1;
 		uint32_t harq_process_number : 3;
 		uint32_t pad : 4;
-		uint32_t buffer_status : 4;
 		uint32_t channel_quality_indicator : 4;
+		uint32_t buffer_status : 4;
 	} format_1;
-	struct mac_feedback_info_format_2
+	struct mac_feedbaack_info_format_6
 	{
-		uint32_t channel_quality_indicator : 4;
+		uint32_t reserved : 1;
+		uint32_t harq_process_number : 3;
 		uint32_t pad : 4;
-		uint32_t codebook_index : 3;
-		uint32_t mimo_feedback : 1;
+		uint32_t channel_quality_indicator : 4;
 		uint32_t buffer_status : 4;
-	} format_2;
-	struct mac_feedback_info_format_3
-	{
-		uint32_t transmission_feedback_transmitter : 1;
-		uint32_t harq_process_number_transmitter : 3;
-		uint32_t pad : 4;
-		uint32_t channel_quality_indicator : 4;
-		uint32_t transmission_feedback_receiver : 1;
-		uint32_t harq_process_number_receiver : 3;
-
-	} format_3;
+	} format_6;
 	struct mac_feedback_byte
 	{
 		uint32_t hi : 4;
@@ -96,7 +86,6 @@ struct harq_tx_params
 	uint32_t redundancy_version : 2;
 	uint32_t new_data_indication : 1;
 	uint32_t harq_process_nr : 3;
-	uint32_t buffer_size : 4; // buffer size in bytes
 };
 
 /* enumerate the different usage of the tx function */
@@ -144,9 +133,7 @@ struct dect_mac_phy_handler_tx_harq_params
 	uint8_t *data;
 	size_t data_size;
 	uint32_t receiver_id;
-	uint32_t buffer_status : 4;
-	uint32_t channel_quality_indicator : 4;
-	uint32_t harq_process_number : 3;
+	struct feedback feedback;
 	uint64_t start_time;
 };
 
@@ -202,7 +189,6 @@ union dect_mac_phy_handler_params
 		.redundancy_version = 0,		\
 		.new_data_indication = 0,		\
 		.harq_process_nr = 0,			\
-		.buffer_size = 0,				\
 	}
 
 /* Header type 1, due to endianness the order is different than in the specification. */
@@ -261,6 +247,7 @@ enum nrf_mac_feedback_format
 	FEEDBACK_FORMAT_3 = 3,
 	FEEDBACK_FORMAT_4 = 4,
 	FEEDBACK_FORMAT_5 = 5,
+	FEEDBACK_FORMAT_6 = 6,
 };
 
 #endif // DEC_MAC_PHY_HANDLER_TYPES_H

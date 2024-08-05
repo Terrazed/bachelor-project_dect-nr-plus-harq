@@ -147,7 +147,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
                 || (header->receiver_id_hi == 0xff && header->receiver_id_hi == 0xff))) // correct transmitter ID (broadcast)
             {
                 LOG_DBG("feedback format : %d", header->feedback_format);
-                if(header->feedback_format == FEEDBACK_FORMAT_1) // receiving HARQ response
+                if((header->feedback_format == FEEDBACK_FORMAT_1) || (header->feedback_format == FEEDBACK_FORMAT_6)) // receiving HARQ response
                 {
                     LOG_DBG("reveiving HARQ response");
                     dect_mac_harq_response(header);

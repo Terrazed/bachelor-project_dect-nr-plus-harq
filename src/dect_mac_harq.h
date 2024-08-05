@@ -11,7 +11,6 @@
 
 #define DECT_MAC_HARQ_WORK_QUEUE_STACK_SIZE 1024
 
-#define HARQ_PROCESS_MAX 4
 #define HANDLE_HARQ 0xA0
 #define ACK 1
 #define NACK 0
@@ -26,6 +25,7 @@ struct dect_mac_harq_process {
     uint8_t redundancy_version;
     uint8_t new_data_indication;
     struct k_work_delayable retransmission_work;
+    uint32_t buffer_size;
 };
 
 
@@ -56,8 +56,11 @@ int dect_mac_harq_retransmit(struct dect_mac_harq_process *harq_process);
 /* function to increment the redundancy version of a harq process */
 void dect_mac_harq_increment_redundancy_version(struct dect_mac_harq_process *harq_process);
 
+/* function that gets the buffer status from the harq process number */
+uint8_t dect_mac_harq_get_buffer_status(uint32_t process_number);
 
-
+/* function that removes space in the buffer */
+int dect_mac_harq_remove_buffer_space(uint32_t process_number, uint8_t byte_count);
 
 
 
@@ -77,10 +80,10 @@ void dect_mac_harq_initialize();
 extern bool dect_mac_harq_initialized;
 
 /* array of the free harq processes */
-extern bool harq_process_occupied[HARQ_PROCESS_MAX];
+extern bool harq_process_occupied[CONFIG_HARQ_PROCESS_COUNT];
 
 /* array of the harq processes */
-extern struct dect_mac_harq_process harq_processes[HARQ_PROCESS_MAX];
+extern struct dect_mac_harq_process harq_processes[CONFIG_HARQ_PROCESS_COUNT];
 
 /* work queue that is used to schedule the execution of a retransmission */
 extern struct k_work_q dect_mac_harq_work_queue;

@@ -87,7 +87,7 @@ void dect_mac_phy_handler_init()
     /* create init parameters */
     const struct nrf_modem_dect_phy_init_params params = {
         .harq_rx_expiry_time_us = CONFIG_HARQ_RX_EXPIRY_TIME_US,
-        .harq_rx_process_count = 4,
+        .harq_rx_process_count = CONFIG_HARQ_PROCESS_COUNT,
     };
 
     /* initialize the dect phy modem */
@@ -156,17 +156,7 @@ void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params par
         .data = params.data,
         .data_size = params.data_size,
         .receiver_id = params.receiver_id,
-        .feedback = {
-            .format = FEEDBACK_FORMAT_1,
-            .info = {
-                .format_1 = {
-                    .channel_quality_indicator = params.channel_quality_indicator,
-                    .transmission_feedback = 0, // NACK but if PDC CRC correct will be put to ACK by the PHY layer
-                    .harq_process_number = params.harq_process_number,
-                    .buffer_status = params.buffer_status,
-                },
-            },
-        },
+        .feedback = params.feedback,
         .harq = DECT_MAC_PHY_HANDLER_NO_HARQ,
         .start_time = params.start_time,
     };

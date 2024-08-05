@@ -15,6 +15,8 @@ void dect_mac_utils_modem_time_save(uint64_t const *time);
 /* function that compute the appopriate the packet length using the data size and the mcs*/
 int dect_mac_utils_get_packet_length(size_t *data_size, uint32_t *mcs, uint32_t *packet_length_type, uint32_t *packet_length);
 
+uint16_t dect_mac_utils_get_bytes_from_packet_length(uint32_t packet_length, uint32_t mcs);
+
 
 
 #endif // DECT_MAC_UTILS_H
