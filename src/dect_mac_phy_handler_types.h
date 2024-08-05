@@ -133,9 +133,7 @@ struct dect_mac_phy_handler_tx_harq_params
 	uint8_t *data;
 	size_t data_size;
 	uint32_t receiver_id;
-	uint32_t buffer_status : 4;
-	uint32_t channel_quality_indicator : 4;
-	uint32_t harq_process_number : 3;
+	struct feedback feedback;
 	uint64_t start_time;
 };
 
