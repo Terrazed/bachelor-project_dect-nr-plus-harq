@@ -16,9 +16,10 @@ enum dect_mac_phy_function
 	TX_HARQ = 6,
 	TX_RX = 7,
 	RSSI = 8,
-	RX_STOP = 9,
-	LINK_CONFIG = 10,
-	TIME_GET = 11,
+	CANCEL = 9,
+	RADIO_CONFIG = 10,
+	LINK_CONFIG = 11,
+	TIME_GET = 12,
 };
 
 /* enumerate all the action that the phy api can be doing */
@@ -32,8 +33,8 @@ enum dect_mac_phy_state
 	RECEIVING = 5,
 	MEASURING_RSSI = 6,
 	STOPPING_RECEPTION = 7,
-	CONFIGURING_LINK = 8,
-	CONFIGURING_RADIO = 9,
+	CONFIGURING_RADIO = 8,
+	CONFIGURING_LINK = 9,
 	GETTING_TIME = 10,
 	UNKNOWN = 11, // this can be the result of a placeholder called
 };
@@ -182,6 +183,7 @@ union dect_mac_phy_handler_params
 	struct dect_mac_phy_handler_tx_rx_params tx_rx_params;
 	struct dect_mac_phy_handler_rssi_params rssi_params;
 	struct dect_mac_phy_handler_cancel_params rx_stop_params;
+	struct dect_mac_phy_handler_radio_config_params radio_config_params;
 };
 
 #define NO_PARAMS (union dect_mac_phy_handler_params *)NULL

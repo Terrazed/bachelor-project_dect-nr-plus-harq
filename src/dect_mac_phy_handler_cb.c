@@ -222,8 +222,11 @@ void dect_mac_phy_radio_config_cb(const struct nrf_modem_dect_phy_radio_config_e
         return;
     }
 
-    /* release the semaphore */
-    k_sem_give(&phy_layer_sem);
+    if (((evt->handle & (1 << 27)) >> 27) == 1) // if the operation comes from the queue
+    {
+        /* release the semaphore */
+        k_sem_give(&phy_layer_sem);
+    }
 }
 
 void dect_mac_phy_link_config_cb(const struct nrf_modem_dect_phy_link_config_event *evt)

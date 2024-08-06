@@ -191,9 +191,14 @@ int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function funct
         LOG_DBG("rssi");
         dect_mac_phy_handler_rssi(params->rssi_params);
         break;
-    case RX_STOP:
+    case CANCEL:
         LOG_DBG("rx stop");
         dect_mac_phy_handler_cancel(params->rx_stop_params);
+        break;
+    case RADIO_CONFIG:
+        LOG_DBG("radio config");
+        params->radio_config_params.handle |= (1 << 27); // set in the handle that the operation comes from the queue
+        dect_mac_phy_handler_radio_config(params->radio_config_params);
         break;
     case LINK_CONFIG:
         LOG_DBG("link config");

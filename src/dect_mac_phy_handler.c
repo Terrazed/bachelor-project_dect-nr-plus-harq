@@ -264,7 +264,7 @@ void dect_mac_phy_handler_radio_config(struct dect_mac_phy_handler_radio_config_
     /* create true params */
     struct nrf_modem_dect_phy_radio_config_params true_params = {
         .start_time = params.start_time,
-        .handle = params.handle,
+        .handle = ((RADIO_CONFIG << 28) | (params.handle & 0x0fffffff)),
         .radio_mode = params.radio_mode,
     };
 
