@@ -297,12 +297,13 @@ struct nrf_modem_dect_phy_callbacks *dect_mac_phy_handler_get_callbacks(void)
     dect_phy_callbacks.init = dect_mac_phy_init_cb;
     dect_phy_callbacks.deinit = dect_mac_phy_deinit_cb;
     dect_phy_callbacks.op_complete = dect_mac_phy_op_complete_cb;
-    dect_phy_callbacks.rx_stop = dect_mac_phy_rx_stop_cb;
+    dect_phy_callbacks.cancel = dect_mac_phy_cancel_cb;
     dect_phy_callbacks.pcc = dect_mac_phy_pcc_cb;
     dect_phy_callbacks.pcc_crc_err = dect_mac_phy_pcc_crc_err_cb;
     dect_phy_callbacks.pdc = dect_mac_phy_pdc_cb;
     dect_phy_callbacks.pdc_crc_err = dect_mac_phy_pdc_crc_err_cb;
     dect_phy_callbacks.rssi = dect_mac_phy_rssi_cb;
+    dect_phy_callbacks.radio_config = dect_mac_phy_radio_config_cb;
     dect_phy_callbacks.link_config = dect_mac_phy_link_config_cb;
     dect_phy_callbacks.time_get = dect_mac_phy_time_get_cb;
     dect_phy_callbacks.capability_get = dect_mac_phy_capability_get_cb;
