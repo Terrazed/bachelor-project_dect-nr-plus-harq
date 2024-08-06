@@ -33,8 +33,9 @@ enum dect_mac_phy_state
 	MEASURING_RSSI = 6,
 	STOPPING_RECEPTION = 7,
 	CONFIGURING_LINK = 8,
-	GETTING_TIME = 9,
-	UNKNOWN = 10, // this can be the result of a placeholder called
+	CONFIGURING_RADIO = 9,
+	GETTING_TIME = 10,
+	UNKNOWN = 11, // this can be the result of a placeholder called
 };
 
 /* struct that represents the capabilities of the modem. */
@@ -164,6 +165,13 @@ struct dect_mac_phy_handler_rssi_params
 struct dect_mac_phy_handler_cancel_params
 {
 	uint32_t handle;
+};
+
+struct dect_mac_phy_handler_radio_config_params
+{
+	uint64_t start_time;
+	uint32_t handle;
+	enum nrf_modem_dect_phy_radio_mode radio_mode;
 };
 
 union dect_mac_phy_handler_params

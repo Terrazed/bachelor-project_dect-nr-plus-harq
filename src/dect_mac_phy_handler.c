@@ -259,6 +259,26 @@ void dect_mac_phy_handler_cancel(struct dect_mac_phy_handler_cancel_params param
     }
 }
 
+void dect_mac_phy_handler_radio_config(struct dect_mac_phy_handler_radio_config_params params)
+{
+    /* create true params */
+    struct nrf_modem_dect_phy_radio_config_params true_params = {
+        .start_time = params.start_time,
+        .handle = params.handle,
+        .radio_mode = params.radio_mode,
+    };
+
+    /* indicating current state */
+    current_state = CONFIGURING_RADIO;
+
+    /* start the radio config */
+    int ret = nrf_modem_dect_phy_radio_config(&true_params);
+    if (ret)
+    {
+        LOG_ERR("nrf_modem_dect_phy_radio_config() returned %d", ret);
+    }
+}
+
 void dect_mac_phy_handler_link_config()
 {
     LOG_ERR("dect_mac_phy_handler_link_config() not implemented");
