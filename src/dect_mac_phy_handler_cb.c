@@ -179,21 +179,21 @@ void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_de
     dect_mac_utils_modem_time_save(time);
 }
 
-void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_status *status, const void *data, uint32_t len)
+void dect_mac_phy_pdc_cb(const struct nrf_modem_dect_phy_pdc_event *evt)
 {
 
     /* saving the data locally to ensure data validity */
-    uint8_t data_local[len];
-    memcpy(data_local, data, len);
+    uint8_t data_local[evt->len];
+    memcpy(data_local, evt->data, evt->len);
 
-    LOG_DBG("pdc callback - time: %llu", *time);
+    LOG_DBG("pdc callback - time: %llu", evt->time);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
-    if (len > 0)
+    if (evt->len > 0)
     {
-        LOG_INF("Received data: %.*s, length: %d", len, data_local, len);
+        LOG_INF("Received data: %.*s, length: %d", evt->len, data_local, evt->len);
     }
     else
     {
