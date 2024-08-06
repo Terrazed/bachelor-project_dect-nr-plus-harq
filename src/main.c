@@ -158,14 +158,14 @@ int main(void)
     LOG_DBG("Modem started");
 
     /* permanent receiving */
-    //struct dect_mac_phy_handler_rx_params rx_params = {
-    //    .handle = 0x14,
-    //    .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
-    //    .rx_period_ms = 10000,
-    //    .receiver_identity = 0,
-    //    .start_time = 0,
-    //};
-    //dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_PERMANENT);    
+    struct dect_mac_phy_handler_rx_params rx_params = {
+        .handle = 0x14,
+        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+        .rx_period_ms = 10000,
+        .receiver_identity = 0,
+        .start_time = 0,
+    };
+    dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_PERMANENT);    
 
     return 0;
 }
