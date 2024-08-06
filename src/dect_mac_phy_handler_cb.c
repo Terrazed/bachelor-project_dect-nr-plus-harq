@@ -209,6 +209,23 @@ void dect_mac_phy_pdc_crc_err_cb(const struct nrf_modem_dect_phy_pdc_crc_failure
     dect_mac_utils_modem_time_save(&evt->time);
 }
 
+void dect_mac_phy_radio_config_cb(const struct nrf_modem_dect_phy_radio_config_event *evt)
+{
+    LOG_DBG("radio config callback - time: %llu, err: %d", evt->time, evt->err);
+
+    /* saving the time */
+    dect_mac_utils_modem_time_save(&evt->time);
+
+    if (evt->err)
+    {
+        LOG_ERR("radio config callback - error: %d", evt->err);
+        return;
+    }
+
+    /* release the semaphore */
+    k_sem_give(&phy_layer_sem);
+}
+
 void dect_mac_phy_link_config_cb(const struct nrf_modem_dect_phy_link_config_event *evt)
 {
     LOG_DBG("link config callback - time: %llu, err: %d", evt->time, evt->err);
