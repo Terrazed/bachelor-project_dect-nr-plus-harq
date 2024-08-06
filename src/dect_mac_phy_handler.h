@@ -8,6 +8,8 @@
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler_cb.h"
 
+#define DECT_MAC_START_TIME_NOW_DELAY NRF_MODEM_DECT_MODEM_TIME_TICK_RATE_KHZ
+
 /* functions to start and stop the modem, the modem should be started when using the other commands */
 int dect_mac_phy_handler_start_modem();
 int dect_mac_phy_handler_stop_modem();

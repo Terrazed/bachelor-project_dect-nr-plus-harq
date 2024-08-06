@@ -206,6 +206,8 @@ void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params)
     true_tx_params.handle = ((TX_RX << 28) | (params.handle & 0x0fffffff));
     true_rx_params.handle = ((TX_RX << 28) | (params.handle & 0x0fffffff));
 
+    true_rx_params.start_time = 0;
+
     struct nrf_modem_dect_phy_tx_rx_params true_params = {
         .tx = true_tx_params,
         .rx = true_rx_params,
@@ -227,12 +229,21 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params)
 
     /* create true params */
     struct nrf_modem_dect_phy_rssi_params true_params = {
-        .start_time = params.start_time,
         .handle = params.handle,
         .carrier = CONFIG_CARRIER,
         .duration = params.duration,
         .reporting_interval = params.reporting_interval,
     };
+
+    /* set the starttime */
+    if ((current_radio_mode != NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY) && (params.start_time == 0))
+    {
+        true_params.start_time = dect_mac_utils_modem_time_now() + DECT_MAC_START_TIME_NOW_DELAY;
+    }
+    else
+    {
+        true_params.start_time = params.start_time;
+    }
 
     /* indicating current state */
     current_state = MEASURING_RSSI;
@@ -264,10 +275,19 @@ void dect_mac_phy_handler_radio_config(struct dect_mac_phy_handler_radio_config_
 {
     /* create true params */
     struct nrf_modem_dect_phy_radio_config_params true_params = {
-        .start_time = params.start_time,
         .handle = ((RADIO_CONFIG << 28) | (params.handle & 0x0fffffff)),
         .radio_mode = params.radio_mode,
     };
+
+    /* set the starttime */
+    if ((current_radio_mode != NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY) && (params.start_time == 0))
+    {
+        true_params.start_time = dect_mac_utils_modem_time_now() + DECT_MAC_START_TIME_NOW_DELAY;
+    }
+    else
+    {
+        true_params.start_time = params.start_time;
+    }
 
     /* indicating current state */
     current_state = CONFIGURING_RADIO;
@@ -304,8 +324,15 @@ void dect_mac_phy_handler_time_get()
 
 void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params)
 {
-    /* set the time */
-    output_params->start_time = input_params->start_time;
+    /* set the start time */
+    if ((current_radio_mode != NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY) && (input_params->start_time == 0))
+    {
+        output_params->start_time = dect_mac_utils_modem_time_now() + DECT_MAC_START_TIME_NOW_DELAY;
+    }
+    else
+    {
+        output_params->start_time = input_params->start_time;
+    }
 
     /* set the handle */
     output_params->handle = ((TX << 28) | (input_params->handle & 0x0fffffff));
@@ -421,9 +448,17 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
 
 void dect_mac_phy_handler_rx_config(struct dect_mac_phy_handler_rx_params *input_params, struct nrf_modem_dect_phy_rx_params *output_params)
 {
+    /* set the start time */
+    if ((current_radio_mode != NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY) && (input_params->start_time == 0))
+    {
+        output_params->start_time = dect_mac_utils_modem_time_now() + DECT_MAC_START_TIME_NOW_DELAY;
+    }
+    else
+    {
+        output_params->start_time = input_params->start_time;
+    }
 
     /* create true params */
-    output_params->start_time = input_params->start_time;
     output_params->handle = ((RX << 28) | (input_params->handle & 0x0fffffff));
     output_params->network_id = CONFIG_NETWORK_ID;
     output_params->mode = input_params->rx_mode;
