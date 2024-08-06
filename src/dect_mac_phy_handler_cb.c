@@ -96,26 +96,26 @@ void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err e
     }
 }
 
-void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_status *status, const union nrf_modem_dect_phy_hdr *hdr)
+void dect_mac_phy_pcc_cb(const struct nrf_modem_dect_phy_pcc_event *evt)
 {
-    LOG_DBG("pcc callback - time: %llu, stf_start_time: %llu", *time, status->stf_start_time);
+    LOG_DBG("pcc callback - time: %llu, stf_start_time: %llu", evt->time, evt->stf_start_time);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
     /* optimize node */
-    uint32_t transmitter_id = ((struct phy_ctrl_field_common_type1 *)hdr)->transmitter_id_hi << 8 | ((struct phy_ctrl_field_common_type1 *)hdr)->transmitter_id_lo;
-    uint32_t rssi = status->rssi_2 / 2; // rssi is in 0.5 dBm
-    uint32_t snr = status->snr / 4;     // snr is in 0.25 dB
-    uint32_t transmit_power = ((struct phy_ctrl_field_common_type1 *)hdr)->transmit_power;
-    uint32_t transmit_mcs = ((struct phy_ctrl_field_common_type1 *)hdr)->df_mcs;
+    uint32_t transmitter_id = ((struct phy_ctrl_field_common_type1*)&evt->hdr)->transmitter_id_hi << 8 | ((struct phy_ctrl_field_common_type1 *)&evt->hdr)->transmitter_id_lo;
+    uint32_t rssi = evt->rssi_2 / 2; // rssi is in 0.5 dBm
+    uint32_t snr = evt->snr / 4;     // snr is in 0.25 dB
+    uint32_t transmit_power = ((struct phy_ctrl_field_common_type1 *)&evt->hdr)->transmit_power;
+    uint32_t transmit_mcs = ((struct phy_ctrl_field_common_type1 *)&evt->hdr)->df_mcs;
     dect_mac_node_optimize(transmitter_id, rssi, snr, transmit_power, transmit_mcs);
 
-    if (status->phy_type == HEADER_TYPE_2)
+    if (evt->phy_type == HEADER_TYPE_2)
     {
         LOG_DBG("Received PCC with header type 2");
 
-        struct phy_ctrl_field_common_type2 *header = (struct phy_ctrl_field_common_type2 *)hdr;
+        struct phy_ctrl_field_common_type2 *header = (struct phy_ctrl_field_common_type2 *)&evt->hdr;
 
         LOG_DBG("header format : %d", header->header_format);
 
@@ -127,7 +127,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
             {
                 LOG_DBG("reveiving HARQ request, rv: %d", header->df_red_version);
 
-                int err = dect_mac_harq_request(header, status->stf_start_time);
+                int err = dect_mac_harq_request(header, evt->stf_start_time);
                 if (err)
                 {
                     LOG_ERR("Transmit HARQ failed");
@@ -161,7 +161,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
             LOG_ERR("Received PCC with unknown header format");
         }
     }
-    else if (status->phy_type == HEADER_TYPE_1)
+    else if (evt->phy_type == HEADER_TYPE_1)
     {
         LOG_DBG("Received PCC with header type 1");
     }
