@@ -273,14 +273,14 @@ void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_ph
     k_sem_give(&phy_layer_sem);
 }
 
-void dect_mac_phy_deinit_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
+void dect_mac_phy_deinit_cb(const struct nrf_modem_dect_phy_deinit_event *evt)
 {
-    LOG_DBG("deinit callback - time: %llu, err: %d", *time, err);
+    LOG_DBG("deinit callback - time: %llu, err: %d", &evt->time, &evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(evt->time);
 
-    if (err)
+    if (evt->err)
     {
         LOG_ERR("deinit callback - error: %d", err);
         return;
