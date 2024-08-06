@@ -82,16 +82,16 @@ void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_
     k_sem_give(&phy_layer_sem);
 }
 
-void dect_mac_phy_rx_stop_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, uint32_t handle)
+void dect_mac_phy_cancel_cb(const struct nrf_modem_dect_phy_cancel_event *evt)
 {
-    LOG_DBG("rx stop callback - time: %llu, err: %d, handle: %x", *time, err, handle);
+    LOG_DBG("rx stop callback - time: %llu, err: %d, handle: %x", evt->time, evt->err, evt->handle);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
-    if (err)
+    if (evt->err)
     {
-        LOG_ERR("rx stop callback - error: %d", err);
+        LOG_ERR("rx stop callback - error: %d", evt->err);
         return;
     }
 }
