@@ -7,19 +7,19 @@
 /* enumerate all the function that the phy api can do and give them a number */
 enum dect_mac_phy_function
 {
-	PLACEHOLDER = 0, // use this if you want handle the operation by yourself (can be dangerous)
-	CAPABILITY_GET = 1,
-	INIT = 2,
-	DEINIT = 3,
-	RX = 4,
-	TX = 5,
-	TX_HARQ = 6,
-	TX_RX = 7,
-	RSSI = 8,
-	CANCEL = 9,
-	RADIO_CONFIG = 10,
-	LINK_CONFIG = 11,
-	TIME_GET = 12,
+	PLACEHOLDER = 0x0, // use this if you want handle the operation by yourself (can be dangerous)
+	CAPABILITY_GET = 0x1,
+	INIT = 0x2,
+	DEINIT = 0x3,
+	RX = 0x4,
+	TX = 0x5,
+	TX_HARQ = 0x6,
+	TX_RX = 0x7,
+	RSSI = 0x8,
+	CANCEL = 0x9,
+	RADIO_CONFIG = 0xa,
+	LINK_CONFIG = 0xb,
+	TIME_GET = 0xc,
 };
 
 /* enumerate all the action that the phy api can be doing */
