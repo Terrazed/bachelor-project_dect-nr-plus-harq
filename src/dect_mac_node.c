@@ -402,13 +402,11 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
         int wanted_tx_power;
         if (wanted_tx_power_dbm <= -40)
         {
-            // wanted_tx_power = 0;
-            wanted_tx_power = 2; // after measuring, it seems that the power requiered to send the power "2" is lower than the power "0"
+            wanted_tx_power = 0;
         }
         else if (wanted_tx_power_dbm <= -30)
         {
-            // wanted_tx_power = 1;
-            wanted_tx_power = 2; // after measuring, it seems that the power requiered to send the power "2" is lower than the power "1"
+            wanted_tx_power = 1;
         }
         else if (wanted_tx_power_dbm <= -20)
         {
