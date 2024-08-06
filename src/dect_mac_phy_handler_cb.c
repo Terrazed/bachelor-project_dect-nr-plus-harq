@@ -209,16 +209,16 @@ void dect_mac_phy_pdc_crc_err_cb(const uint64_t *time, const struct nrf_modem_de
     dect_mac_utils_modem_time_save(time);
 }
 
-void dect_mac_phy_link_config_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
+void dect_mac_phy_link_config_cb(const struct nrf_modem_dect_phy_link_config_event *evt)
 {
-    LOG_DBG("link config callback - time: %llu, err: %d", *time, err);
+    LOG_DBG("link config callback - time: %llu, err: %d", evt->time, evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(evt->time);
 
-    if (err)
+    if (evt->err)
     {
-        LOG_ERR("link config callback - error: %d", err);
+        LOG_ERR("link config callback - error: %d", evt->err);
         return;
     }
 
