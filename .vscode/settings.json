@@ -1,5 +1,5 @@
 {
-    "nrf-connect.topdir": "${nrf-connect.sdk:2.7.0}",
+    "nrf-connect.topdir": "c:\\ncs\\dect_modem_1.1.0_prealpha",
     "files.associations": {
         "nrf_modem_dect_phy.h": "c",
         "kernel.h": "c",
