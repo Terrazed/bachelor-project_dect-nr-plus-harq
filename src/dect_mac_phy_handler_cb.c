@@ -243,31 +243,31 @@ void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err 
     k_sem_give(&phy_layer_sem);
 }
 
-void dect_mac_phy_capability_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_capability *capability)
+void dect_mac_phy_capability_get_cb(const struct nrf_modem_dect_phy_capability_get_event *evt)
 {
-    LOG_DBG("capability get callback - time: %llu, err: %d", *time, err);
+    LOG_DBG("capability get callback - time: %llu, err: %d", evt->time, evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
-    if (err)
+    if (evt->err)
     {
-        LOG_ERR("capability get callback - error: %d", err);
+        LOG_ERR("capability get callback - error: %d", evt->err);
         return;
     }
 
     /* save the capabilities of the modem */
-    capabilities.dect_version = capability->dect_version;
-    capabilities.power_class = capability->variant[0].power_class;
-    capabilities.rx_spatial_streams = capability->variant[0].rx_spatial_streams;
-    capabilities.rx_tx_diversity = capability->variant[0].rx_tx_diversity;
-    capabilities.rx_gain = capability->variant[0].rx_gain;
-    capabilities.mcs_max = capability->variant[0].mcs_max;
-    capabilities.harq_soft_buf_size = capability->variant[0].harq_soft_buf_size;
-    capabilities.harq_process_count_max = capability->variant[0].harq_process_count_max;
-    capabilities.harq_feedback_delay = capability->variant[0].harq_feedback_delay;
-    capabilities.mu = capability->variant[0].mu;
-    capabilities.beta = capability->variant[0].beta;
+    capabilities.dect_version = evt->capability->dect_version;
+    capabilities.power_class = evt->capability->variant[0].power_class;
+    capabilities.rx_spatial_streams = evt->capability->variant[0].rx_spatial_streams;
+    capabilities.rx_tx_diversity = evt->capability->variant[0].rx_tx_diversity;
+    capabilities.rx_gain = evt->capability->variant[0].rx_gain;
+    capabilities.mcs_max = evt->capability->variant[0].mcs_max;
+    capabilities.harq_soft_buf_size = evt->capability->variant[0].harq_soft_buf_size;
+    capabilities.harq_process_count_max = evt->capability->variant[0].harq_process_count_max;
+    capabilities.harq_feedback_delay = evt->capability->variant[0].harq_feedback_delay;
+    capabilities.mu = evt->capability->variant[0].mu;
+    capabilities.beta = evt->capability->variant[0].beta;
 
     /* release the semaphore */
     k_sem_give(&phy_layer_sem);
@@ -278,7 +278,7 @@ void dect_mac_phy_deinit_cb(const struct nrf_modem_dect_phy_deinit_event *evt)
     LOG_DBG("deinit callback - time: %llu, err: %d", evt->time, evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(evt->time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
     if (evt->err)
     {
