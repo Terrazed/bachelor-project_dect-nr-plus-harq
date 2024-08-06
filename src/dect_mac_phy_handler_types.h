@@ -161,7 +161,7 @@ struct dect_mac_phy_handler_rssi_params
 	uint64_t start_time;
 };
 
-struct dect_mac_phy_handler_rx_stop_params
+struct dect_mac_phy_handler_cancel_params
 {
 	uint32_t handle;
 };
@@ -173,7 +173,7 @@ union dect_mac_phy_handler_params
 	struct dect_mac_phy_handler_tx_harq_params tx_harq_params;
 	struct dect_mac_phy_handler_tx_rx_params tx_rx_params;
 	struct dect_mac_phy_handler_rssi_params rssi_params;
-	struct dect_mac_phy_handler_rx_stop_params rx_stop_params;
+	struct dect_mac_phy_handler_cancel_params rx_stop_params;
 };
 
 #define NO_PARAMS (union dect_mac_phy_handler_params *)NULL

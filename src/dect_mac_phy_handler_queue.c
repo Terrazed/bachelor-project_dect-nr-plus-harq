@@ -193,7 +193,7 @@ int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function funct
         break;
     case RX_STOP:
         LOG_DBG("rx stop");
-        dect_mac_phy_handler_rx_stop(params->rx_stop_params);
+        dect_mac_phy_handler_cancel(params->rx_stop_params);
         break;
     case LINK_CONFIG:
         LOG_DBG("link config");

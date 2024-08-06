@@ -21,7 +21,7 @@ void dect_mac_phy_handler_tx(struct dect_mac_phy_handler_tx_params params);
 void dect_mac_phy_handler_tx_harq(struct dect_mac_phy_handler_tx_harq_params params);
 void dect_mac_phy_handler_tx_rx(struct dect_mac_phy_handler_tx_rx_params params);
 void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params);
-void dect_mac_phy_handler_rx_stop(struct dect_mac_phy_handler_rx_stop_params params);
+void dect_mac_phy_handler_cancel(struct dect_mac_phy_handler_cancel_params params);
 void dect_mac_phy_handler_link_config();
 void dect_mac_phy_handler_time_get();
 

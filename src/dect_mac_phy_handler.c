@@ -244,14 +244,15 @@ void dect_mac_phy_handler_rssi(struct dect_mac_phy_handler_rssi_params params)
     }
 }
 
-void dect_mac_phy_handler_rx_stop(struct dect_mac_phy_handler_rx_stop_params params)
+void dect_mac_phy_handler_cancel(struct dect_mac_phy_handler_cancel_params params)
 {
 
     /* indicating current state */
     current_state = STOPPING_RECEPTION;
 
+
     /* start the rx stop */
-    int ret = nrf_modem_dect_phy_rx_stop(params.handle);
+    int ret = nrf_modem_dect_phy_cancel(params.handle);
     if (ret)
     {
         LOG_ERR("nrf_modem_dect_phy_rx_stop() returned %d", ret);

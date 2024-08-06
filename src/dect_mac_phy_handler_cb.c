@@ -299,7 +299,7 @@ void dect_mac_phy_deinit_cb(const struct nrf_modem_dect_phy_deinit_event *evt)
 
     if (evt->err)
     {
-        LOG_ERR("deinit callback - error: %d", err);
+        LOG_ERR("deinit callback - error: %d", evt->err);
         return;
     }
 
