@@ -5,6 +5,7 @@ LOG_MODULE_REGISTER(handler, 3);
 
 uint16_t device_id = 0;
 enum dect_mac_phy_state current_state = IDLING;
+enum nrf_modem_dect_phy_radio_mode current_radio_mode = NRF_MODEM_DECT_PHY_RADIO_MODE_LOW_LATENCY;
 
 int dect_mac_phy_handler_start_modem()
 {
@@ -276,6 +277,10 @@ void dect_mac_phy_handler_radio_config(struct dect_mac_phy_handler_radio_config_
     if (ret)
     {
         LOG_ERR("nrf_modem_dect_phy_radio_config() returned %d", ret);
+    }
+    else
+    {
+        current_radio_mode = params.radio_mode;
     }
 }
 
