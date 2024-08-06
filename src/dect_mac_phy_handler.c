@@ -301,6 +301,7 @@ void dect_mac_phy_handler_radio_config(struct dect_mac_phy_handler_radio_config_
     else
     {
         current_radio_mode = params.radio_mode;
+        LOG_INF("Radio mode set to %d", current_radio_mode);
     }
 }
 

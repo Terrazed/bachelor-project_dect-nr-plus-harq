@@ -63,16 +63,43 @@ void button2_pressed(){
     dect_mac_phy_handler_cancel(rx_stop_params);
 }
 
+static uint8_t radio_mode = 0;
+
 void button3_pressed(){
     dk_set_led(DK_LED3, 1);
     k_sleep(K_MSEC(200));
     dk_set_led(DK_LED3, 0);
+
+    radio_mode = (radio_mode + 1)%3;
+
+    struct dect_mac_phy_handler_radio_config_params radio_params = {
+        .handle = 0x187,
+        .radio_mode = radio_mode,
+        .start_time = 0,
+    };
+
+    dect_phy_queue_put(RADIO_CONFIG, (union dect_mac_phy_handler_params*)&radio_params, PRIORITY_HIGH);
+
+    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
+        .handle = 0x48000014,
+    };
+
+    dect_mac_phy_handler_cancel(rx_stop_params);
 }
 
 void button4_pressed(){
     dk_set_led(DK_LED4, 1);
     k_sleep(K_MSEC(200));
     dk_set_led(DK_LED4, 0);
+
+    struct dect_mac_phy_handler_rx_params rx_params = {
+        .handle = 0x14,
+        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+        .rx_period_ms = 10000,
+        .receiver_identity = 0,
+        .start_time = 0,
+    };
+    dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_HIGH);    
 }
 
 void button_handler(uint32_t button_state, uint32_t has_changed)
@@ -146,14 +173,14 @@ int main(void)
     LOG_DBG("Modem started");
 
     /* permanent receiving */
-    struct dect_mac_phy_handler_rx_params rx_params = {
-        .handle = 0x14,
-        .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
-        .rx_period_ms = 10000,
-        .receiver_identity = 0,
-        .start_time = 0,
-    };
-    dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_PERMANENT);    
+    //struct dect_mac_phy_handler_rx_params rx_params = {
+    //    .handle = 0x14,
+    //    .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
+    //    .rx_period_ms = 10000,
+    //    .receiver_identity = 0,
+    //    .start_time = 0,
+    //};
+    //dect_phy_queue_put(RX, (union dect_mac_phy_handler_params*)&rx_params, PRIORITY_PERMANENT);    
 
     return 0;
 }

@@ -42,6 +42,11 @@ void dect_mac_phy_op_complete_cb(const struct nrf_modem_dect_phy_op_complete_eve
             LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", evt->time, evt->temp, evt->err, evt->handle);
         }
 
+        if (((evt->handle & (1 << 27)) >> 27) == 1) // if the operation comes from the queue
+        {
+            /* release the semaphore */
+            k_sem_give(&phy_layer_sem);
+        }
         return;
     }
 
