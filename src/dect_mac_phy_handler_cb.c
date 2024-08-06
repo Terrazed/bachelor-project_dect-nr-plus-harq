@@ -171,12 +171,12 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
     }
 }
 
-void dect_mac_phy_pcc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pcc_crc_failure *crc_failure)
+void dect_mac_phy_pcc_crc_err_cb(const struct nrf_modem_dect_phy_pcc_crc_failure_event *evt)
 {
-    LOG_ERR("pcc crc error callback - time: %llu", *time);
+    LOG_ERR("pcc crc error callback - time: %llu", evt->time);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 }
 
 void dect_mac_phy_pdc_cb(const struct nrf_modem_dect_phy_pdc_event *evt)
