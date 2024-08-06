@@ -23,38 +23,38 @@ void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dec
     k_sem_give(&phy_layer_sem);
 }
 
-void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum nrf_modem_dect_phy_err err, uint32_t handle)
+void dect_mac_phy_op_complete_cb(const struct nrf_modem_dect_phy_op_complete_event *evt)
 {
-    LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+    LOG_DBG("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", evt->time, evt->temp, evt->err, evt->handle);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
-    if (err)
+    if (evt->err)
     {
-        if (err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
+        if (evt->err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
         {
-            LOG_INF("operation with handle: %x couldn't be started at the requested time, retrying...", handle);
+            LOG_INF("operation with handle: %x couldn't be started at the requested time, retrying...", evt->handle);
             dect_mac_phy_handler_queue_operation_failed_retry();
         }
-        else if (err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
+        else if (evt->err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
         {
-            LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
+            LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", evt->time, evt->temp, evt->err, evt->handle);
         }
 
         return;
     }
 
     /* dont release the semaphore when switching from tx to rx in a combined operation */
-    if ((current_state == TRANSMITTING) && ((handle >> 28) == TX_RX))
+    if ((current_state == TRANSMITTING) && ((evt->handle >> 28) == TX_RX))
     {
         // switch from tx to rx
         current_state = RECEIVING;
 
-        if ((handle & 0x07FFFFF0) == HANDLE_HARQ)
+        if ((evt->handle & 0x07FFFFF0) == HANDLE_HARQ)
         {
             // get harq process
-            uint8_t harq_porcess_number = handle & 0x0000000F;
+            uint8_t harq_porcess_number = evt->handle & 0x0000000F;
             struct k_work_delayable *work = &harq_processes[harq_porcess_number].retransmission_work;
 
             // schedule retransmission work
@@ -63,7 +63,7 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
     else
     {
-        if (((handle & (1 << 27)) >> 27) == 1) // if the operation comes from the queue
+        if (((evt->handle & (1 << 27)) >> 27) == 1) // if the operation comes from the queue
         {
             /* release the semaphore */
             k_sem_give(&phy_layer_sem);
