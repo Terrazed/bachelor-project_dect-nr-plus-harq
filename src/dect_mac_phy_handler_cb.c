@@ -201,12 +201,12 @@ void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
     }
 }
 
-void dect_mac_phy_pdc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_crc_failure *crc_failure)
+void dect_mac_phy_pdc_crc_err_cb(const struct nrf_modem_dect_phy_pdc_crc_failure_event *evt)
 {
-    LOG_ERR("pdc crc error callback - time: %llu", *time);
+    LOG_ERR("pdc crc error callback - time: %llu", evt->time);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 }
 
 void dect_mac_phy_link_config_cb(const struct nrf_modem_dect_phy_link_config_event *evt)
@@ -214,7 +214,7 @@ void dect_mac_phy_link_config_cb(const struct nrf_modem_dect_phy_link_config_eve
     LOG_DBG("link config callback - time: %llu, err: %d", evt->time, evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(evt->time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
     if (evt->err)
     {
