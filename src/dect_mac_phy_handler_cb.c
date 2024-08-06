@@ -6,16 +6,16 @@ LOG_MODULE_REGISTER(handler_cb, 3);
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
 
-void dect_mac_phy_init_cb(const uint64_t *time, int16_t temp, enum nrf_modem_dect_phy_err err, const struct nrf_modem_dect_phy_modem_cfg *cfg)
+void dect_mac_phy_init_cb(const struct nrf_modem_dect_phy_init_event *evt)
 {
-    LOG_DBG("init callback - time: %llu, temp: %d, err: %d", *time, temp, err);
+    LOG_DBG("init callback - time: %llu, temp: %d, err: %d", evt->time, evt->temp, evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
-    if (err)
+    if (evt->err)
     {
-        LOG_ERR("init callback - error: %d", err);
+        LOG_ERR("init callback - error: %d", evt->err);
         return;
     }
 
