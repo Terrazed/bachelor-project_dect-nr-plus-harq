@@ -71,12 +71,12 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
 }
 
-void dect_mac_phy_rssi_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rssi_meas *meas)
+void dect_mac_phy_rssi_cb(const struct nrf_modem_dect_phy_rssi_event *evt)
 {
-    LOG_DBG("rssi callback - time: %llu", *time);
+    LOG_DBG("rssi callback - time: %llu", evt->time);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
     /* release the semaphore */
     k_sem_give(&phy_layer_sem);
