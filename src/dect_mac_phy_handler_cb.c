@@ -226,16 +226,16 @@ void dect_mac_phy_link_config_cb(const uint64_t *time, enum nrf_modem_dect_phy_e
     k_sem_give(&phy_layer_sem);
 }
 
-void dect_mac_phy_time_get_cb(const uint64_t *time, enum nrf_modem_dect_phy_err err)
+void dect_mac_phy_time_get_cb(const struct nrf_modem_dect_phy_time_get_event *evt)
 {
-    LOG_DBG("time get callback - time: %llu, err: %d", *time, err);
+    LOG_DBG("time get callback - time: %llu, err: %d", evt->time, evt->err);
 
     /* saving the time */
-    dect_mac_utils_modem_time_save(time);
+    dect_mac_utils_modem_time_save(&evt->time);
 
-    if (err)
+    if (evt->err)
     {
-        LOG_ERR("time get callback - error: %d", err);
+        LOG_ERR("time get callback - error: %d", evt->err);
         return;
     }
 
