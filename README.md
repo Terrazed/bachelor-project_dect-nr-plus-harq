@@ -1,2 +1,25 @@
-# bachelor-project_dect-nr-plus-harq
-This repository contains the program made for my Bachelor project. It consists in coding a program that uses the dect nr+ phy layer provided by nordic semiconductor to make harq transmission / retransmission. It should also have a power management system to consum as little power as it can.
+# DECT NR+ HARQ Implementation
+
+_insert logos of "DECT NR+", "Nordic semi", "HEVS"_
+
+## About The Project
+This project is undertaken as part of Simon Donnet-Monay's bachelor's thesis in collaboration with **HES-SO Valais/Wallis** and **Nordic Semiconductor** 
+
+## Description
+
+
+## Requirement
+
+
+### Knowledge
+
+
+### Hardware
+
+
+### Software
+
+
+## Author and acknowledgement
+
+
