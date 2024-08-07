@@ -124,14 +124,12 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
     case DK_BTN3_MSK:
         if (button_state & DK_BTN3_MSK)
         {
-            LOG_INF("Button 3 pressed");
             button3_pressed();
         }
         break;
     case DK_BTN4_MSK:
         if (button_state & DK_BTN4_MSK)
         {
-            LOG_INF("Button 4 pressed");
             button4_pressed();
         }
         break;
