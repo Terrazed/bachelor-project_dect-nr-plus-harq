@@ -32,7 +32,13 @@ To understand the DECT NR+ protocol it is ***highly recommended*** to read at le
 
 The most important parts for this project are in the MAC layer (**5.5: "HARQ Operation"** and **6.2: "Physical Header Field"**)
 
+To understand the PHY layer API it is also recommended to read [this article](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nrf_modem/doc/dectphy.html)
+
 ### Software
+
+Before starting with this project, it is better to have a good understanding of the Zephyr RTOS and also to be familliar with RTOS concepts.
+To run this project, **the DECT NR+ modem firmware** is needed to run on the modem core. _(To obtain the DECT NR+ PHY firmware, you must contact the Nordic Semiconductor sales department)_
+It also needs to run at least on the nRF SDK v2.7.0
 
 
 ### Hardware
