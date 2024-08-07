@@ -34,7 +34,7 @@ The most important parts for this project are in the MAC layer (**5.5: "HARQ Ope
 
 To understand the PHY layer API it is also recommended to read **[this article](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nrf_modem/doc/dectphy.html)**
 
-***Before running this project be aware of the radio regulation on the 1.9 GHz band in you country to change the CONFIG_TX_POWER in the [prj.conf](./prj.conf) file***
+***Before running this project be aware of the radio regulation on the 1.9 GHz band in you country to change the configurations in the [prj.conf](./prj.conf) file***
 
 ### Software
 
@@ -50,9 +50,15 @@ _There is a branch for the DECT NR+ PHY API v1.1.0, but to run it, it needs the 
 
 This project has been made for nRF91x1 developpement kits but should be able t run on any board containing a [DECT NR+ compatible nRF chip](https://www.nordicsemi.com/Products/Wireless/DECT-NR/Products).
 
-
-
-
 ## Author and acknowledgement
 
+Author:
+- Simon Donnet-Monay [[Terrazed](https://github.com/Terrazed)]
+
+Acknowledgement:
+- [Nordic Semiconductor](https://www.nordicsemi.com/) (host institution)
+- [HES-SO Vallais/Wallis](https://www.hevs.ch/) (engineering school)
+- L. Piikivi (Technical Manager (Nordic Semi))
+- K. Sæther (Administrative Manager (Nordic Semi))
+- M. Rieder (Expert (HESSO))
 
