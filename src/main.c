@@ -32,11 +32,11 @@ void button1_pressed(){
 
     dect_mac_harq_transmit(params);
 
-    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
-        .handle = 0x48000014,
-    };
-
-    dect_mac_phy_handler_cancel(rx_stop_params);
+//    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
+//        .handle = 0x48000014,
+//    };
+//
+//    dect_mac_phy_handler_cancel(rx_stop_params);
 }
 
 void button2_pressed(){
@@ -58,11 +58,11 @@ void button2_pressed(){
 
     dect_mac_harq_transmit(params);
 
-    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
-        .handle = 0x48000014,
-    };
-
-    dect_mac_phy_handler_cancel(rx_stop_params);
+//    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
+//        .handle = 0x48000014,
+//    };
+//
+//    dect_mac_phy_handler_cancel(rx_stop_params);
 }
 
 static uint8_t radio_mode = 0;
