@@ -17,6 +17,7 @@ void button1_pressed(){
     dk_set_led(DK_LED1, 1);
     k_sleep(K_MSEC(200));
     dk_set_led(DK_LED1, 0);
+    LOG_INF("Button 1 pressed");
 
     static uint8_t data[700];
     static uint16_t data_len;
@@ -42,6 +43,7 @@ void button2_pressed(){
     dk_set_led(DK_LED2, 1);
     k_sleep(K_MSEC(200));
     dk_set_led(DK_LED2, 0);
+    LOG_INF("Button 2 pressed");
 
     static uint8_t data[700];
     static uint16_t data_len;
@@ -69,6 +71,7 @@ void button3_pressed(){
     dk_set_led(DK_LED3, 1);
     k_sleep(K_MSEC(200));
     dk_set_led(DK_LED3, 0);
+    LOG_INF("Button 3 pressed");
 
     radio_mode = (radio_mode + 1)%3;
 
@@ -80,18 +83,18 @@ void button3_pressed(){
 
     dect_phy_queue_put(RADIO_CONFIG, (union dect_mac_phy_handler_params*)&radio_params, PRIORITY_HIGH);
 
-    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
-        .handle = 0x48000014,
-    };
-
-    dect_mac_phy_handler_cancel(rx_stop_params);
+//    struct dect_mac_phy_handler_cancel_params rx_stop_params = {
+//        .handle = 0x48000014,
+//    };
+//
+//    dect_mac_phy_handler_cancel(rx_stop_params);
 }
 
 void button4_pressed(){
     dk_set_led(DK_LED4, 1);
     k_sleep(K_MSEC(200));
     dk_set_led(DK_LED4, 0);
-
+    LOG_INF("Button 4 pressed");
     struct dect_mac_phy_handler_rx_params rx_params = {
         .handle = 0x14,
         .rx_mode = NRF_MODEM_DECT_PHY_RX_MODE_SINGLE_SHOT,
@@ -109,14 +112,12 @@ void button_handler(uint32_t button_state, uint32_t has_changed)
     case DK_BTN1_MSK:
         if (button_state & DK_BTN1_MSK)
         {
-            LOG_INF("Button 1 pressed");
             button1_pressed();
         }
         break;
     case DK_BTN2_MSK:
         if (button_state & DK_BTN2_MSK)
         {
-            LOG_INF("Button 2 pressed");
             button2_pressed();
         }
         break;
@@ -171,6 +172,8 @@ int main(void)
     }
 
     LOG_DBG("Modem started");
+
+    
 
     /* permanent receiving */
     //struct dect_mac_phy_handler_rx_params rx_params = {
