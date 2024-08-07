@@ -12,24 +12,30 @@ This can be used as an example of how to implement the HARQ protocol and also sh
 
 
 ## Files Organisation
-- dect_mac_phy_handler: This file contains all the functions needed to send operation to the PHY API (user → PHY)
-- dect_mac_phy_handler_cb: This file contains the callback from the PHY API (PHY → user)
-- dect_mac_phy_handler_queue: this file contains a queue that plans operations through the handler. This is done to handle the fact that the PHY API is not thread-safe. The queue handle operation's priority and permanent operation (operation that reschedule themself indefinitely).
-- dect_mac_phy_handler_type: This file contains all the custom types (structs, enum, defines, ...) used in the dect_mac_phy_handler_xxx files.
-- dect_mac_node: this file can be used to memorize other devices (nodes) and optimize the power and modulation for all the cached nodes.
-- dect_mac_harq: this file handle all the HARQ-related process. It handles the transmissions, retransmissions, acknowledgement, ...
-- dect_mac_error_code: this file contains all the error codes used in the mac layer.
-- dect_mac_utils: this file contains some function that are used in the mac layer but were not relevent to put in other files.
-## Requirement
+- **dect_mac_phy_handler**: This file contains all the functions needed to send operation to the PHY API (user → PHY)
+- **dect_mac_phy_handler_cb**: This file contains the callback from the PHY API (PHY → user)
+- **dect_mac_phy_handler_queue**: this file contains a queue that plans operations through the handler. This is done to handle the fact that the PHY API is not thread-safe. The queue handle operation's priority and permanent operation (operation that reschedule themself indefinitely).
+- **dect_mac_phy_handler_type**: This file contains all the custom types (structs, enum, defines, ...) used in the dect_mac_phy_handler_xxx files.
+- **dect_mac_node**: this file can be used to memorize other devices (nodes) and optimize the power and modulation for all the cached nodes.
+- **dect_mac_harq**: this file handle all the HARQ-related process. It handles the transmissions, retransmissions, acknowledgement, ...
+- **dect_mac_error_code**: this file contains all the error codes used in the mac layer.
+- **dect_mac_utils**: this file contains some function that are used in the mac layer but were not relevent to put in other files.
 
+## Requirement
+To use this project it is required to have a basic knowledge of the DECT NR+ protocol, to know how to use Zephyr RTOS and to have a compatible hardware.
 
 ### Knowledge
+To understand the DECT NR+ protocol it is ***highly recommended*** to read at least once the following technical specification: 
+- **[Part 1: Overview [ETSI_TS_103_636-1]](./doc/dect-nr-plus-specifications/etsi_ts_103_636-1_v1.5.1.pdf)**
+- **[Part 3: Physical layer [ETSI_TS_103_636-3]](./doc/dect-nr-plus-specifications/etsi_ts_103_636-3_v1.5.1.pdf)**
+- **[Part 4: MAC layer [ETSI_TS_103_636-4]](./doc/dect-nr-plus-specifications/etsi_ts_103_636-4_v1.5.1.pdf)**
+
+The most important parts for this project are in the MAC layer (**5.5: "HARQ Operation"** and **6.2: "Physical Header Field"**)
+
+### Software
 
 
 ### Hardware
-
-
-### Software
 
 
 ## Author and acknowledgement
