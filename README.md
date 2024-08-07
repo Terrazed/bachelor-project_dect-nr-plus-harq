@@ -32,16 +32,25 @@ To understand the DECT NR+ protocol it is ***highly recommended*** to read at le
 
 The most important parts for this project are in the MAC layer (**5.5: "HARQ Operation"** and **6.2: "Physical Header Field"**)
 
-To understand the PHY layer API it is also recommended to read [this article](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nrf_modem/doc/dectphy.html)
+To understand the PHY layer API it is also recommended to read **[this article](https://docs.nordicsemi.com/bundle/ncs-latest/page/nrfxlib/nrf_modem/doc/dectphy.html)**
+
+***Before running this project be aware of the radio regulation on the 1.9 GHz band in you country to change the CONFIG_TX_POWER in the [prj.conf](./prj.conf) file***
 
 ### Software
 
 Before starting with this project, it is better to have a good understanding of the Zephyr RTOS and also to be familliar with RTOS concepts.
-To run this project, **the DECT NR+ modem firmware** is needed to run on the modem core. _(To obtain the DECT NR+ PHY firmware, you must contact the Nordic Semiconductor sales department)_
-It also needs to run at least on the nRF SDK v2.7.0
 
+This project is using the nRF connect SDK and needs at least SDK v2.7.0.
+
+To run this project, **the DECT NR+ modem firmware** is needed to run on the modem core. _(To obtain the DECT NR+ PHY firmware, you must contact the Nordic Semiconductor sales department)_
+
+_There is a branch for the DECT NR+ PHY API v1.1.0, but to run it, it needs the modem firmware version 1.1.0 which is not released yet. The main difference is that is implements some power managment features and some function calls are a bit differents. There is a preview [here](https://github.com/nrfconnect/sdk-nrf/pull/16142)_
 
 ### Hardware
+
+This project has been made for nRF91x1 developpement kits but should be able t run on any board containing a [DECT NR+ compatible nRF chip](https://www.nordicsemi.com/Products/Wireless/DECT-NR/Products).
+
+
 
 
 ## Author and acknowledgement
