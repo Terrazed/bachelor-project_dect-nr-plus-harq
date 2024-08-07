@@ -12,7 +12,7 @@
 #define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 2048
 
 /* maximum number of item that the queue can contains */
-#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 8
+#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 16
 
 /* maximum number of retry before giving up on an operation */
 #define DECT_MAC_PHY_HANDLER_QUEUE_MAX_RETRY 10

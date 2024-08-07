@@ -323,6 +323,10 @@ void dect_mac_phy_handler_time_get()
     }
 }
 
+uint32_t test_mcs = 0;
+uint32_t test_power = 0;
+uint32_t test_packet_length = 0;
+
 void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input_params, struct nrf_modem_dect_phy_tx_params *output_params)
 {
     /* set the start time */
@@ -348,41 +352,44 @@ void dect_mac_phy_handler_tx_config(struct dect_mac_phy_handler_tx_params *input
     /* set the carrier */
     output_params->carrier = CONFIG_CARRIER;
 
-    uint32_t tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
-    uint32_t df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
+    //uint32_t tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
+    //uint32_t df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
 
-    uint32_t packet_length_type;
-    uint32_t packet_length;
+    uint32_t df_mcs = test_mcs;
+    uint32_t tx_power = test_power;
 
-    int ret = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
-    if (ret)
-    {
-        LOG_DBG("packet length is too long for current mcs, trying to augment mcs to fit the packet length");
+    uint32_t packet_length_type = 0;
+    uint32_t packet_length = test_packet_length;
 
-        int can_augment_mcs = -1;
-        int found_packet_length = -1;
+    //int ret = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+    //if (ret)
+    //{
+    //    LOG_DBG("packet length is too long for current mcs, trying to augment mcs to fit the packet length");
 
-        /* finds a mcs where data fits */
-        do
-        {
-            can_augment_mcs = dect_mac_node_reduce_mcs(input_params->receiver_id, -1);
-            dect_mac_node_add_power(input_params->receiver_id, 1);
-            df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
-            tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
-            found_packet_length = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
-        } while (can_augment_mcs == 0 && found_packet_length != 0);
+    //    int can_augment_mcs = -1;
+    //    int found_packet_length = -1;
 
-        if (found_packet_length != 0)
-        {
-            LOG_ERR("packet length is too long for this device, please send the datas in smaller chunks");
-        }
-        else
-        {
-            LOG_DBG("mcs is now %d and the power is %d due to packet length", df_mcs, tx_power);
-        }
+    //    /* finds a mcs where data fits */
+    //    do
+    //    {
+    //        can_augment_mcs = dect_mac_node_reduce_mcs(input_params->receiver_id, -1);
+    //        dect_mac_node_add_power(input_params->receiver_id, 1);
+    //        df_mcs = dect_mac_node_get_mcs(input_params->receiver_id);
+    //        tx_power = dect_mac_node_get_tx_power(input_params->receiver_id);
+    //        found_packet_length = dect_mac_utils_get_packet_length(&input_params->data_size, &df_mcs, &packet_length_type, &packet_length);
+    //    } while (can_augment_mcs == 0 && found_packet_length != 0);
 
-        LOG_DBG("packet_length_type: %d, packet_length: %d, df_mcs: %d", packet_length_type, packet_length, df_mcs);
-    }
+    //    if (found_packet_length != 0)
+    //    {
+    //        LOG_ERR("packet length is too long for this device, please send the datas in smaller chunks");
+    //    }
+    //    else
+    //    {
+    //        LOG_DBG("mcs is now %d and the power is %d due to packet length", df_mcs, tx_power);
+    //    }
+
+    //    LOG_DBG("packet_length_type: %d, packet_length: %d, df_mcs: %d", packet_length_type, packet_length, df_mcs);
+    //}
 
     /* handle the case of sending a message with no data */
     if (input_params->data_size == 0)

@@ -54,4 +54,9 @@ extern enum dect_mac_phy_state current_state;
 /* variable that represent the current radio mode of the modem (declared in dect_mac_phy_handler.c) */
 extern enum nrf_modem_dect_phy_radio_mode current_radio_mode;
 
+
+extern uint32_t test_mcs;
+extern uint32_t test_power;
+extern uint32_t test_packet_length;
+
 #endif // DECT_MAC_PHY_HANDLER_H
