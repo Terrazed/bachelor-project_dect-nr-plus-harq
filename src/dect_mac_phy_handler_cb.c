@@ -1,7 +1,7 @@
 #include "dect_mac_phy_handler_cb.h"
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(handler_cb,3);
+LOG_MODULE_REGISTER(handler_cb, 3);
 
 /* initialize globals variables */
 struct dect_capabilities capabilities = {0};
@@ -32,12 +32,12 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
 
     if (err)
     {
-        if(err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
+        if (err == NRF_MODEM_DECT_PHY_ERR_INVALID_START_TIME)
         {
             LOG_INF("operation with handle: %x couldn't be started at the requested time, retrying...", handle);
             dect_mac_phy_handler_queue_operation_failed_retry();
         }
-        else if(err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
+        else if (err != NRF_MODEM_DECT_PHY_ERR_COMBINED_OP_FAILED)
         {
             LOG_ERR("op complete callback - time: %llu, temp: %d, err: %d, handle: %x", *time, temperature, err, handle);
         }
@@ -46,12 +46,12 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
 
     /* dont release the semaphore when switching from tx to rx in a combined operation */
-    if ((current_state == TRANSMITTING) && ((handle>>28) == TX_RX))
+    if ((current_state == TRANSMITTING) && ((handle >> 28) == TX_RX))
     {
         // switch from tx to rx
         current_state = RECEIVING;
 
-        if((handle & 0x07FFFFF0) == HANDLE_HARQ)
+        if ((handle & 0x07FFFFF0) == HANDLE_HARQ)
         {
             // get harq process
             uint8_t harq_porcess_number = handle & 0x0000000F;
@@ -63,12 +63,11 @@ void dect_mac_phy_op_complete_cb(const uint64_t *time, int16_t temperature, enum
     }
     else
     {
-        if(((handle & (1<<27))>>27) == 1) // if the operation comes from the queue
+        if (((handle & (1 << 27)) >> 27) == 1) // if the operation comes from the queue
         {
             /* release the semaphore */
             k_sem_give(&phy_layer_sem);
         }
-        
     }
 }
 
@@ -105,36 +104,35 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
     dect_mac_utils_modem_time_save(time);
 
     /* optimize node */
-    uint32_t transmitter_id = ((struct phy_ctrl_field_common_type1*)hdr)->transmitter_id_hi << 8 | ((struct phy_ctrl_field_common_type1*)hdr)->transmitter_id_lo;
-    uint32_t rssi = status->rssi_2/2; // rssi is in 0.5 dBm
-    uint32_t snr = status->snr/4; // snr is in 0.25 dB
-    uint32_t transmit_power = ((struct phy_ctrl_field_common_type1*)hdr)->transmit_power;
-    uint32_t transmit_mcs = ((struct phy_ctrl_field_common_type1*)hdr)->df_mcs;
+    uint32_t transmitter_id = ((struct phy_ctrl_field_common_type1 *)hdr)->transmitter_id_hi << 8 | ((struct phy_ctrl_field_common_type1 *)hdr)->transmitter_id_lo;
+    uint32_t rssi = status->rssi_2 / 2; // rssi is in 0.5 dBm
+    uint32_t snr = status->snr / 4;     // snr is in 0.25 dB
+    uint32_t transmit_power = ((struct phy_ctrl_field_common_type1 *)hdr)->transmit_power;
+    uint32_t transmit_mcs = ((struct phy_ctrl_field_common_type1 *)hdr)->df_mcs;
     dect_mac_node_optimize(transmitter_id, rssi, snr, transmit_power, transmit_mcs);
 
-
-    if(status->phy_type == HEADER_TYPE_2)
+    if (status->phy_type == HEADER_TYPE_2)
     {
         LOG_DBG("Received PCC with header type 2");
-       
 
         struct phy_ctrl_field_common_type2 *header = (struct phy_ctrl_field_common_type2 *)hdr;
 
         LOG_DBG("header format : %d", header->header_format);
 
-        if(header->header_format == HEADER_FORMAT_000) // requesting HARQ response
+        if (header->header_format == HEADER_FORMAT_000) // requesting HARQ response
         {
-            if(header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
-				&& ((header->receiver_id_hi == (device_id >> 8) && header->receiver_id_lo == (device_id & 0xff)) // correct receiver ID (this device)
-				|| (header->receiver_id_hi == 0xff && header->receiver_id_lo == 0xff))) // correct receiver ID (broadcast) TODO: does this makes sense ?
-            { 
+            if (header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
+                && ((header->receiver_id_hi == (device_id >> 8) && header->receiver_id_lo == (device_id & 0xff)) // correct receiver ID (this device)
+                    || (header->receiver_id_hi == 0xff && header->receiver_id_lo == 0xff))) // correct receiver ID (broadcast) TODO: does this makes sense ?
+            {
                 LOG_DBG("reveiving HARQ request, rv: %d", header->df_red_version);
 
-				int err = dect_mac_harq_request(header, status->stf_start_time);
-				if(err){
-					LOG_ERR("Transmit HARQ failed");
-				}
-            } 
+                int err = dect_mac_harq_request(header, status->stf_start_time);
+                if (err)
+                {
+                    LOG_ERR("Transmit HARQ failed");
+                }
+            }
             else
             {
                 LOG_WRN("Received HARQ request with wrong receiver ID");
@@ -142,12 +140,12 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
         }
         else if (header->header_format == HEADER_FORMAT_001)
         {
-            if(header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
+            if (header->short_network_id == (CONFIG_NETWORK_ID & 0xff) // correct network ID
                 && ((header->receiver_id_hi == (device_id >> 8) && header->receiver_id_lo == (device_id & 0xff)) // correct transmitter ID (this device)
-                || (header->receiver_id_hi == 0xff && header->receiver_id_hi == 0xff))) // correct transmitter ID (broadcast)
+                    || (header->receiver_id_hi == 0xff && header->receiver_id_hi == 0xff))) // correct transmitter ID (broadcast)
             {
                 LOG_DBG("feedback format : %d", header->feedback_format);
-                if(header->feedback_format == FEEDBACK_FORMAT_1) // receiving HARQ response
+                if ((header->feedback_format == FEEDBACK_FORMAT_1) || (header->feedback_format == FEEDBACK_FORMAT_6)) // receiving HARQ response
                 {
                     LOG_DBG("reveiving HARQ response");
                     dect_mac_harq_response(header);
@@ -163,7 +161,7 @@ void dect_mac_phy_pcc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
             LOG_ERR("Received PCC with unknown header format");
         }
     }
-    else if(status->phy_type == HEADER_TYPE_1)
+    else if (status->phy_type == HEADER_TYPE_1)
     {
         LOG_DBG("Received PCC with header type 1");
     }
@@ -187,22 +185,20 @@ void dect_mac_phy_pdc_cb(const uint64_t *time, const struct nrf_modem_dect_phy_r
     /* saving the data locally to ensure data validity */
     uint8_t data_local[len];
     memcpy(data_local, data, len);
-    
+
     LOG_DBG("pdc callback - time: %llu", *time);
-    
+
     /* saving the time */
     dect_mac_utils_modem_time_save(time);
 
-    if(len > 0)
+    if (len > 0)
     {
         LOG_INF("Received data: %.*s, length: %d", len, data_local, len);
-
     }
     else
     {
         LOG_INF("Received data: NULL");
     }
-    
 }
 
 void dect_mac_phy_pdc_crc_err_cb(const uint64_t *time, const struct nrf_modem_dect_phy_rx_pdc_crc_failure *crc_failure)

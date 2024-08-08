@@ -21,33 +21,25 @@ void dect_mac_node_thread()
 
 void dect_mac_node_clean_unused_nodes()
 {
-    // LOG_DBG("cleaning unused nodes");
 
     struct sys_hashmap_iterator iterator;
     struct sys_hashmap_iterator delete_iterator;
     struct node *node_ptr;
 
-    // LOG_DBG("gettin the iterator");
     node_hashmap.api->iter(&node_hashmap, &iterator); // initialize iterator
     if (sys_hashmap_iterator_has_next(&iterator))
     {
         iterator.next(&iterator); // move to first node
     }
-
-    // LOG_DBG("starting while loop");
     while (sys_hashmap_iterator_has_next(&iterator))
     {
 
-        // LOG_DBG("copying iterator");
         memcpy(&delete_iterator, &iterator, sizeof(struct sys_hashmap_iterator)); // save last iterator
 
-        // LOG_DBG("getting next node");
         iterator.next(&iterator); // move to next node (this has to be done before deleting the node to avoid iterator corruption)
 
-        // LOG_DBG("getting node address");
         node_ptr = (struct node *)delete_iterator.value; // get node
 
-        // LOG_DBG("checking if node is used, node: %d, value: %d", node_ptr, delete_iterator.value);
         if (!node_ptr->used)
         {
             LOG_INF("deleting node %d", node_ptr->address);
@@ -174,7 +166,6 @@ uint8_t dect_mac_node_get_cqi(uint32_t address)
         {
             LOG_INF("cqi: node %d not found, creating the node", address);
             should_create_node = true;
-            result = 0;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -214,23 +205,23 @@ int dect_mac_node_create_node(uint32_t address, uint8_t tx_power, int8_t mcs)
         {
         case 0:
             LOG_WRN("node already exists, overwriting");
-            result = 0;
+            result = OK;
             break;
         case 1:
             LOG_DBG("node created : %d", address);
-            result = 0;
+            result = OK;
             break;
         case -ENOMEM:
             LOG_ERR("not enough memory to create node");
-            result = -1; // TODO: true error code
+            result = NO_MEM_HEAP;
             break;
         case -ENOSPC:
             LOG_ERR("too many nodes already, cannot create node");
-            result = -1; // TODO: true error code
+            result = NO_FREE_NODE;
             break;
         default:
             LOG_ERR("unexpected result from sys_hashmap_insert");
-            result = -1; // TODO: true error code
+            result = UNKNOWN_ERR;
             break;
         }
     }
@@ -254,12 +245,12 @@ int dect_mac_node_delete_node(uint32_t address)
         {
             LOG_DBG("node %p deleted", (void *)node_ptr);
             k_free(node_ptr);
-            result = 0;
+            result = OK;
         }
         else
         {
             LOG_ERR("node not found");
-            result = -1; // TODO: true error code
+            result = NODE_NOT_FOUND;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -278,12 +269,12 @@ int dect_mac_node_set_tx_power(uint32_t address, uint8_t tx_power)
         {
             node_ptr->used = true; // mark node as used
             node_ptr->tx_power = tx_power;
-            result = 0;
+            result = OK;
         }
         else
         {
             LOG_ERR("node not found");
-            result = -1; // TODO: true error code
+            result = NODE_NOT_FOUND;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -302,12 +293,12 @@ int dect_mac_node_set_mcs(uint32_t address, int8_t mcs)
         {
             node_ptr->used = true; // mark node as used
             node_ptr->mcs = mcs;
-            result = 0;
+            result = OK;
         }
         else
         {
             LOG_ERR("node not found");
-            result = -1; // TODO: true error code
+            result = NODE_NOT_FOUND;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -324,7 +315,7 @@ bool dect_mac_node_contains_node(uint32_t address)
 int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t received_tx_power, int8_t received_mcs)
 {
 
-    int result = 0;
+    int result = OK;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
     {
@@ -335,7 +326,7 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
             if (ret)
             {
                 LOG_ERR("cannot create node");
-                result = -1; // TODO: true error code
+                result = ret;
             }
         }
 
@@ -358,40 +349,52 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
             received_tx_power_dbm = -20;
             break;
         case 3:
-            received_tx_power_dbm = -13;
+            received_tx_power_dbm = -16;
             break;
         case 4:
-            received_tx_power_dbm = -6;
+            received_tx_power_dbm = -12;
             break;
         case 5:
-            received_tx_power_dbm = -3;
+            received_tx_power_dbm = -8;
             break;
         case 6:
-            received_tx_power_dbm = 0;
+            received_tx_power_dbm = -4;
             break;
         case 7:
-            received_tx_power_dbm = 3;
+            received_tx_power_dbm = 0;
             break;
         case 8:
-            received_tx_power_dbm = 6;
+            received_tx_power_dbm = 4;
             break;
         case 9:
-            received_tx_power_dbm = 10;
+            received_tx_power_dbm = 7;
             break;
         case 10:
-            received_tx_power_dbm = 14;
+            received_tx_power_dbm = 10;
             break;
         case 11:
+            received_tx_power_dbm = 13;
+            break;
+        case 12:
+            received_tx_power_dbm = 16;
+            break;
+        case 13:
             received_tx_power_dbm = 19;
+            break;
+        case 14:
+            received_tx_power_dbm = 21;
+            break;
+        case 15:
+            received_tx_power_dbm = 23;
             break;
         default:
             LOG_WRN("received_tx_power not in range");
-            result = -1; // TODO: true error code
+            result = POWER_NOT_IN_RANGE;
             break;
         }
 
         /* compute wanted power output */
-        int8_t power_margin = CONFIG_TX_POWER_MARGIN_DBM;                                              // offset to ensure good communication
+        int8_t power_margin = CONFIG_TX_POWER_MARGIN_DBM; // offset to ensure good communication
         int wanted_tx_power_dbm = received_tx_power_dbm - (rssi2 - CONFIG_RSSI_TARGET - power_margin); // set tx power to rssi2
         LOG_DBG("wanted_tx_power_dbm: %d", wanted_tx_power_dbm);
 
@@ -411,41 +414,57 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
         {
             wanted_tx_power = 2;
         }
-        else if (wanted_tx_power_dbm <= -13)
+        else if (wanted_tx_power_dbm <= -16)
         {
             wanted_tx_power = 3;
         }
-        else if (wanted_tx_power_dbm <= -6)
+        else if (wanted_tx_power_dbm <= -12)
         {
             wanted_tx_power = 4;
         }
-        else if (wanted_tx_power_dbm <= -3)
+        else if (wanted_tx_power_dbm <= -8)
         {
             wanted_tx_power = 5;
         }
-        else if (wanted_tx_power_dbm <= 0)
+        else if (wanted_tx_power_dbm <= -4)
         {
             wanted_tx_power = 6;
         }
-        else if (wanted_tx_power_dbm <= 3)
+        else if (wanted_tx_power_dbm <= 0)
         {
             wanted_tx_power = 7;
         }
-        else if (wanted_tx_power_dbm <= 6)
+        else if (wanted_tx_power_dbm <= 4)
         {
             wanted_tx_power = 8;
         }
-        else if (wanted_tx_power_dbm <= 10)
+        else if (wanted_tx_power_dbm <= 7)
         {
             wanted_tx_power = 9;
         }
-        else if (wanted_tx_power_dbm <= 14)
+        else if (wanted_tx_power_dbm <= 10)
         {
             wanted_tx_power = 10;
         }
-        else
+        else if (wanted_tx_power_dbm <= 13)
         {
             wanted_tx_power = 11;
+        }
+        else if (wanted_tx_power_dbm <= 16)
+        {
+            wanted_tx_power = 12;
+        }
+        else if (wanted_tx_power_dbm <= 19)
+        {
+            wanted_tx_power = 13;
+        }
+        else if (wanted_tx_power_dbm <= 21)
+        {
+            wanted_tx_power = 13; // not enough power with this device to reach power 14
+        }
+        else
+        {
+            wanted_tx_power = 13; // not enough power with this device to reach power 15
         }
 
         LOG_DBG("wanted_tx_power: %d", wanted_tx_power);
@@ -484,7 +503,7 @@ int dect_mac_node_optimize(uint32_t address, int32_t rssi2, int32_t snr, uint8_t
         {
             wanted_mcs = -1; // communication with <10% PER not possible
             LOG_WRN("channel is too noisy, cannot garantee communication with <10% PER");
-            result = -1; // TODO: true error code
+            result = CHANNEL_TOO_NOISY;
         }
 
         LOG_DBG("wanted_mcs: %d", wanted_mcs);
@@ -529,12 +548,12 @@ int dect_mac_node_add_power(uint32_t address, int8_t power_to_add)
                 LOG_DBG("new power: %d", node_ptr->tx_power);
             }
 
-            result = 0;
+            result = OK;
         }
         else
         {
             LOG_ERR("node not found");
-            result = -1; // TODO: true error code
+            result = NODE_NOT_FOUND;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -560,24 +579,24 @@ int dect_mac_node_reduce_mcs(uint32_t address, int8_t mcs_to_reduce)
             {
                 LOG_DBG("cannot reduce mcs below 0, setting to 0");
                 node_ptr->mcs = 0;
-                result = -1; // TODO: true error code
+                result = MIN_MCS_REACHED;
             }
             else if (node_ptr->mcs > capabilities.mcs_max)
             {
                 LOG_DBG("cannot makes the mcs above %d, setting to %d", capabilities.mcs_max, capabilities.mcs_max);
                 node_ptr->mcs = capabilities.mcs_max;
-                result = -1; // TODO: true error code
+                result = MAX_MCS_REACHED;
             }
             else
             {
                 LOG_DBG("new mcs: %d", node_ptr->mcs);
-                result = 0;
+                result = OK;
             }
         }
         else
         {
             LOG_ERR("node not found");
-            result = -1; // TODO: true error code
+            result = NODE_NOT_FOUND;
         }
     }
     k_mutex_unlock(&node_mutex);
@@ -600,12 +619,12 @@ int dect_mac_node_full_power(uint32_t address)
 
             node_ptr->tx_power = CONFIG_TX_POWER;
 
-            result = 0;
+            result = OK;
         }
         else
         {
             LOG_ERR("node not found");
-            result = -1; // TODO: true error code
+            result = NODE_NOT_FOUND;
         }
     }
     k_mutex_unlock(&node_mutex);

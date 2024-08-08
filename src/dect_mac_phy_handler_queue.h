@@ -6,19 +6,21 @@
 
 #include "dect_mac_phy_handler_types.h"
 #include "dect_mac_phy_handler.h"
+#include "dect_mac_error_code.h"
 
 /* stack size in bytes of the thread that reads the list */
 #define DECT_MAC_PHY_HANDLER_QUEUE_THREAD_STACK_SIZE 2048
 
 /* maximum number of item that the queue can contains */
-#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 32
+#define DECT_MAC_PHY_HANDLER_QUEUE_MAX_ITEMS 8
 
 /* maximum number of retry before giving up on an operation */
 #define DECT_MAC_PHY_HANDLER_QUEUE_MAX_RETRY 10
 
 #define DECT_MAC_PHY_HANDLER_QUEUE_RETRY_DELAY K_MSEC(10)
 
-enum dect_mac_phy_handler_queue_priority{
+enum dect_mac_phy_handler_queue_priority
+{
     PRIORITY_PERMANENT = 0,
     PRIORITY_LOW = 10000,
     PRIORITY_MEDIUM = 20000,
@@ -26,32 +28,31 @@ enum dect_mac_phy_handler_queue_priority{
     PRIORITY_CRITICAL = UINT32_MAX,
 };
 
-/* struct that represents an item in the queue */
-struct dect_mac_phy_handler_queue_item {
-    sys_snode_t node;
+struct dect_mac_phy_handler_queue_item
+{
     enum dect_mac_phy_function function;
     union dect_mac_phy_handler_params params;
     enum dect_mac_phy_handler_queue_priority priority;
 };
 
-struct dect_mac_phy_handler_queue_work {
-    struct k_work work;
-    enum dect_mac_phy_function function;
-    union dect_mac_phy_handler_params params;
-    enum dect_mac_phy_handler_queue_priority priority;
+/* struct that represents an item in the queue */
+struct dect_mac_phy_handler_queue_node
+{
+    sys_snode_t node;
+    struct dect_mac_phy_handler_queue_item item;
 };
 
 /* function to put an operation in the waiting queue of the dect phy api */
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority);
 
 /* function that really puts the operation in the queue, this is done to handle putting an operation while being in an ISR */
-void dect_mac_phy_queue_work_handler(struct k_work *work);
+void dect_mac_phy_handler_queue_put_thread();
 
 /* function to execute an operation from the waiting queue of the dect phy api */
-int dect_mac_phy_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
+int dect_mac_phy_handler_queue_function_execute(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params);
 
 /* thread where the list is read whenever something is in it */
-void dect_mac_phy_queue_thread();
+void dect_mac_phy_handler_queue_exec_thread();
 
 /* function to retry the scheduling of an operation */
 void dect_mac_phy_handler_queue_operation_failed_retry();
@@ -62,7 +63,7 @@ void dect_mac_phy_handler_queue_timer_callback(struct k_timer *timer_id);
 /* single linked list that to handle the planification of the phy layer actions (declared in dect_mac_phy_handler_queue.c) */
 extern sys_slist_t dect_mac_phy_handler_queue;
 
-extern struct dect_mac_phy_handler_queue_item current_item;
+extern struct dect_mac_phy_handler_queue_node current_node;
 
 /* semaphore that restrain access to the dect phy layer (declared in dect_mac_phy_handler_queue.c) */
 extern struct k_sem phy_layer_sem;
@@ -80,7 +81,12 @@ extern struct k_timer dect_mac_phy_handler_queue_operation_failed_timer;
 extern uint32_t dect_mac_phy_handler_queue_operation_failed_counter;
 
 /* work that is used to schedule the execution of an operation */
-extern struct k_work_q dect_mac_phy_handler_queue_work_queue;
+extern struct k_msgq dect_mac_phy_handler_queue_msgq;
 
+/* memory slab for putting the items */
+extern struct k_mem_slab dect_mac_phy_handler_queue_item_slab;
+
+/* memory slab for puttin the nodes */
+extern struct k_mem_slab dect_mac_phy_handler_queue_node_slab;
 
 #endif // DECT_MAC_PHY_HANDLER_QUEUE_H
