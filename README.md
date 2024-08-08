@@ -1,6 +1,10 @@
 # DECT NR+ HARQ Implementation
 
-_insert logos of "DECT NR+", "Nordic semi", "HEVS"_
+<p align="center">
+  <img src="./assets/dect_nr_logo.png" width="150" title="DECT NR+">
+  <img src="./assets/nordic_semi_logo.png" width="350" title="Nordic Semiconductor">
+  <img src="./assets/hesso_valais_logo.png" width="300" title="HES-SO Valais/Wallis">
+</p>
 
 ## About The Project
 This project is undertaken as part of Simon Donnet-Monay's bachelor's thesis in collaboration with **HES-SO Valais/Wallis** and **Nordic Semiconductor** 
