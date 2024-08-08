@@ -1,9 +1,9 @@
 # DECT NR+ HARQ Implementation
 
 <p align="center">
-  <img src="./assets/dect_nr_logo.png" width="150" title="DECT NR+">
-  <img src="./assets/nordic_semi_logo.png" width="350" title="Nordic Semiconductor">
-  <img src="./assets/hesso_valais_logo.png" width="300" title="HES-SO Valais/Wallis">
+  <img src="./assets/dect_nr_logo.png" height="100" title="DECT NR+">
+  <img src="./assets/nordic_semi_logo.png" height="100" title="Nordic Semiconductor">
+  <img src="./assets/hesso_valais_logo.png" height="110" title="HES-SO Valais/Wallis">
 </p>
 
 ## About The Project
