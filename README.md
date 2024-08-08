@@ -3,7 +3,7 @@
 <p align="center">
   <img src="./assets/dect_nr_logo.png" height="100" title="DECT NR+">
   <img src="./assets/nordic_semi_logo.png" height="100" title="Nordic Semiconductor">
-  <img src="./assets/hesso_valais_logo.png" height="110" title="HES-SO Valais/Wallis">
+  <img src="./assets/hesso_valais_logo.png" height="100" title="HES-SO Valais/Wallis">
 </p>
 
 ## About The Project
