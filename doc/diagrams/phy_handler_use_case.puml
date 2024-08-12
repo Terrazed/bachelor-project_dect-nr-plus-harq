@@ -50,7 +50,7 @@ RF stuff is done"
 user --> queue : schedule operation
 harq --> queue : schedule operation
 queue --> handler : give operation to handler
-handler --> phy : execute operation
+handler -> phy : execute operation
 phy --> modem : transmit to the modem core
 modem --> phy : sends the result back
 phy --> callback : calls the callback
