@@ -1,4 +1,4 @@
-@startuml
+@startuml phy_handler_use_case
 
 !theme cerulean
 skinparam DefaultFontSize 16
