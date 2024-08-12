@@ -4,9 +4,11 @@
 skinparam DefaultFontSize 16
 skinparam defaultFontName Gotham Black
 
+skinparam defaultTextAlignment center
+
 start
-:create the PHY API parameters
-for the function from the handler
+:create the PHY API
+parameters from the handler
 function parameters;
 :indicating current state;
 :send to PHY API;
