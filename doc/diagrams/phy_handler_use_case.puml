@@ -1,0 +1,62 @@
+@startuml
+
+!theme cerulean
+'skinparam DefaultFontSize 16
+skinparam defaultFontName Gotham Black
+
+
+skinparam actorStyle awesome
+
+:USER: as user
+
+package MAC {
+    :HARQ: as harq
+
+    usecase queue as "--dect_mac_phy_handler_queue--
+
+    The user can push operation in the 
+    queue that will be scheduled and 
+    executed by the handler
+
+    This is (mostly) the entry point for
+    the users"
+
+
+    usecase handler as "--dect_mac_phy_handler--
+
+    The handler is an interface that
+    simplify the usage of the PHY layer
+
+    This is the entry point of the PHY API"
+
+    usecase callback as "--dect_mac_phy_handler_cb--
+
+    The callback functions are
+    the exit point of the PHY API"
+}
+
+usecase phy as "--nrf_modem_dect_phy--
+
+This is the PHY API"
+
+usecase modem as "--modem core--
+
+This is where all the 
+RF stuff is done"
+
+
+
+
+user --> queue : schedule operation
+harq --> queue : schedule operation
+queue --> handler : give operation to handler
+handler --> phy : execute operation
+phy --> modem : transmit to the modem core
+modem --> phy : sends the result back
+phy --> callback : calls the callback
+callback ----> user : send result to user
+callback ----> harq : send result to harq
+
+
+
+@enduml
