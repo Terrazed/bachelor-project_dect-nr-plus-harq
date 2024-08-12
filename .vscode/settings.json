@@ -15,5 +15,10 @@
         "log.h": "c",
         "dect_mac_utils.h": "c"
     },
-    "nrf-connect.toolchain.path": "${nrf-connect.toolchain:2.7.0}"
+    "nrf-connect.toolchain.path": "${nrf-connect.toolchain:2.7.0}",
+    "plantuml.exportOutDir": "./doc/diagrams",
+    "plantuml.exportFormat": "svg",
+    "plantuml.diagramsRoot": "./doc/diagrams",
+    "plantuml.exportSubFolder": false,
+    "plantuml.exportIncludeFolderHeirarchy": false
 }
