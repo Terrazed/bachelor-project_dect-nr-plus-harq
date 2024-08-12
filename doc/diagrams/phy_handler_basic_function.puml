@@ -1,0 +1,20 @@
+@startuml phy_handler_basic_function
+
+!theme cerulean
+skinparam DefaultFontSize 16
+skinparam defaultFontName Gotham Black
+
+start
+:create the PHY API parameters
+for the function from the handler
+function parameters;
+:indicating current state;
+:send to PHY API;
+if (function result ?) then (success)
+    -[dashed]->
+else (error)
+    :logging error;
+endif
+end
+
+@enduml
