@@ -1,6 +1,33 @@
 @startuml
 
+!theme cerulean
+skinparam DefaultFontSize 16
+skinparam defaultFontName Gotham Black
 
+start
+:save time;
+:optimize node;
+if (PHY header type ?) then (type 2)
+    :get header;
+    if (Header format ?) then (format 000)
+        if (destination ?) then (me)
+            if (feedback format ?) then (format 1 or 6)
+                :**HARQ response**;
+            else (other)
+            :not implemented;
+            endif
+        else (other)
+        -[dashed]->
+        endif
+    else (format 001)
+    -[dashed]->
+    endif
+
+else (type 1)
+    :beacon;
+endif
+
+end
 
 
 @enduml
