@@ -10,52 +10,59 @@ skinparam actorStyle awesome
 :**USER**: as user
 
 package MAC {
-    :**HARQ**: as harq
+    usecase harq as "**HARQ**"
 
-    usecase queue as "--**dect_mac_phy_handler_queue**--
+    usecase queue as "**QUEUE**"
 
-    The user can push operation in the 
-    queue that will be scheduled and 
-    executed by the handler
+'    The user can push operation in the 
+'    queue that will be scheduled and 
+'    executed by the handler
+'
+'    This is (mostly) the entry point for
+'    the users"
 
-    This is (mostly) the entry point for
-    the users"
 
+    usecase handler as "**HANDLER**"
 
-    usecase handler as "--**dect_mac_phy_handler**--
+'    The handler is an interface that
+'    simplify the usage of the PHY layer
+'
+'    This is the entry point of the PHY API"
 
-    The handler is an interface that
-    simplify the usage of the PHY layer
+    usecase callback as "**CALLBACKS**"
 
-    This is the entry point of the PHY API"
+'    The callback functions are
+'    the exit point of the PHY API"
 
-    usecase callback as "--**dect_mac_phy_handler_cb**--
-
-    The callback functions are
-    the exit point of the PHY API"
+    usecase node as "**NODE**"
 }
 
-usecase phy as "--**nrf_modem_dect_phy**--
+usecase phy as "**PHY**
+**API**"
 
-This is the PHY API"
+'This is the PHY API"
 
-usecase modem as "--**modem core**--
+usecase modem as "**MODEM**
+**CORE**"
 
-This is where all the 
-RF stuff is done"
+'This is where all the 
+'RF stuff is done"
 
 
 
 
-user --> queue : schedule operation
-harq --> queue : schedule operation
-queue --> handler : give operation to handler
-handler -> phy : execute operation
-phy --> modem : transmit to the modem core
-modem --> phy : sends the result back
-phy --> callback : calls the callback
-callback ----> user : send result to user
-callback ----> harq : send result to harq
+user ---> queue : schedule\nPHY operation
+user --> harq : schedule\nHARQ operation
+harq --> queue : schedule\nPHY operation
+queue --> handler : give operation\nto handler
+handler --> phy : execute\noperation
+phy --> modem : execute\noperation
+modem --> phy#line:aquamarine;text:darkcyan : result
+phy ---> callback#line:aquamarine;text:darkcyan : result
+callback --> user#line:aquamarine;text:darkcyan : send result\nto user
+callback --> harq#line:aquamarine;text:darkcyan : send result\nto harq
+node <--> handler : get power\nand mcs
+callback ---> node : optimize\nnode
 
 
 
