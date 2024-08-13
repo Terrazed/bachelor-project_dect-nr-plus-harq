@@ -9,8 +9,9 @@ skinparam defaultTextAlignment center
 start
 :Save the modem time;
 if (error ?) then (yes)
-    :Logs the error;
-    stop
+    -[dashed]->
+    :Log the error;
+    -[dashed]->
 else (no)
     :Do something
     related to
@@ -18,7 +19,7 @@ else (no)
 
     :Notify the queue that
     the PHY is ready;
-    end
 endif
+stop
 
 @enduml

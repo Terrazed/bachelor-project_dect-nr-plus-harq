@@ -1,0 +1,38 @@
+@startuml phy_handler_cb_op_complete
+
+!theme cerulean
+skinparam DefaultFontSize 16
+skinparam defaultFontName Gotham Black
+
+start
+:Save time;
+if (Error ?) then (no)
+    if (current operation = tx from tx_rx ?) then (yes)
+        :Switch from TX to RX;
+        if (has requested HARQ ?) then (yes)
+            :Start HARQ
+            retransmission timer;
+        else
+        -[dashed]->
+        endif
+    else (no)
+        if (operation from queue ?) then (yes)
+            :notify queue of operation completion;
+        else
+        -[dashed]->
+        endif
+    endif
+else (yes)
+    if (Error = Invalid start time ?) then (yes)
+        :Retry operation;
+    elseif(Error != Combined op failed ?) then (yes)
+        :Log error;
+    else
+    -[dashed]->
+    endif
+endif
+
+stop
+
+
+@enduml

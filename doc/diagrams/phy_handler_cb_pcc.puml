@@ -27,7 +27,7 @@ else (type 1)
     :beacon;
 endif
 
-end
+stop
 
 
 @enduml

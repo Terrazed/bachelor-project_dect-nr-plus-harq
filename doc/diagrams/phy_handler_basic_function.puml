@@ -17,6 +17,6 @@ if (function result ?) then (success)
 else (error)
     :logging error;
 endif
-end
+stop
 
 @enduml
