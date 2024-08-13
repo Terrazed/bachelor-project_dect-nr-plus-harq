@@ -7,25 +7,27 @@ skinparam defaultFontName Gotham Black
 start
 :Save time;
 if (Error ?) then (no)
-    if (current operation = tx from tx_rx ?) then (yes)
+    if (current operation ?) then (tx from tx_rx)
         :Switch from TX to RX;
         if (has requested HARQ ?) then (yes)
             :Start HARQ
             retransmission timer;
-        else
+        else (no)
         -[dashed]->
         endif
-    else (no)
-        if (operation from queue ?) then (yes)
-            :notify queue of operation completion;
-        else
+    else (other)
+        if (operation origin ?) then (from queue)
+            :notify queue 
+            of operation
+            completion;
+        else (other)
         -[dashed]->
         endif
     endif
 else (yes)
-    if (Error = Invalid start time ?) then (yes)
+    if (Error type ?) then (Invalid\nstart time)
         :Retry operation;
-    elseif(Error != Combined op failed ?) then (yes)
+    elseif(Error type ?) then (!Combined op\nfailed)
         :Log error;
     else
     -[dashed]->
