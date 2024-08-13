@@ -1,0 +1,24 @@
+@startuml phy_handler_basic_callback
+
+!theme cerulean
+skinparam DefaultFontSize 16
+skinparam defaultFontName Gotham Black
+
+skinparam defaultTextAlignment center
+
+start
+:Save the modem time;
+if (error ?) then (yes)
+    :Logs the error;
+    stop
+else (no)
+    :Do something
+    related to
+    the operation;
+
+    :Notify the queue that
+    the PHY is ready;
+    end
+endif
+
+@enduml
