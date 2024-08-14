@@ -1,0 +1,46 @@
+@startuml phy_handler_queue_sequence
+
+!theme cerulean_modified from ./theme
+
+actor User as user
+participant PHY_handler as phy
+participant PHY_Semaphore as phy_sem
+participant Interface as interface
+participant put_Thread as put_thread
+participant execution_Thread as exec_thread
+participant list_Semaphore as list_sem
+queue put_Message_queue as put_msgq
+queue List as list
+
+put_thread -> put_msgq: wait for message
+activate put_msgq
+exec_thread -> list_sem: wait for operation
+activate list_sem
+user -> interface: puts message
+interface -> put_msgq: sends to message queue
+put_msgq -->(30) put_thread: new message
+deactivate put_msgq
+put_thread -> list : add operation according to priority
+activate list
+put_thread -> list_sem: new message
+put_thread -> put_msgq: wait for message
+activate put_msgq
+list_sem -->(15) exec_thread: new operation
+deactivate list_sem
+exec_thread -> list: get operation
+list --> exec_thread
+deactivate list
+exec_thread -> phy_sem: wait for phy
+activate phy_sem
+exec_thread -> phy: schedule operation
+activate phy
+...operation execute...
+phy --> phy_sem: operation done
+deactivate phy
+phy_sem -->(15) exec_thread: operation done
+deactivate phy_sem
+exec_thread -> list_sem: wait for operation
+activate list_sem
+...
+
+@enduml
