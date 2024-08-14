@@ -1,8 +1,6 @@
 @startuml phy_handler_basic_function
 
-!theme cerulean
-skinparam DefaultFontSize 16
-skinparam defaultFontName Gotham Black
+!theme cerulean_modified from ./theme
 
 skinparam defaultTextAlignment center
 

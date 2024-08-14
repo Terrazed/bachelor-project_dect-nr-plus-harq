@@ -1,8 +1,6 @@
 @startuml phy_handler_cb_op_complete
 
-!theme cerulean
-skinparam DefaultFontSize 16
-skinparam defaultFontName Gotham Black
+!theme cerulean_modified from ./theme
 
 start
 :Save time;
