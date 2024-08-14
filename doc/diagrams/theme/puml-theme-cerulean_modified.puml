@@ -265,6 +265,8 @@ skinparam actor {
 	$primary_scheme()
 	FontColor $DARK
 }
+
+skinparam actorStyle awesome
 !endsub
 
 !startsub arrow
