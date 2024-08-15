@@ -1,0 +1,25 @@
+@startuml mac_queue_optimize
+
+!theme cerulean_modified from ./theme
+
+start
+if (node already exists ?) then (yes)
+    :get node;
+else (no)
+    :create node;
+endif
+:convert received transmission\npower to dBm;
+:compute how much power\nis needed to reach the node\nwith the RSSI target;
+:convert the dBm back to\ntransmission power;
+:set the power to the node;
+:compute the wanted mcs\nwith the measured SNR;
+if (<10% PER possible) then (ok)
+
+else (not ok)
+    :logs a warning;
+endif
+:set the mcs to the node;
+stop
+
+
+@enduml
