@@ -213,14 +213,17 @@ int dect_mac_node_create_node(uint32_t address, uint8_t tx_power, int8_t mcs)
             break;
         case -ENOMEM:
             LOG_ERR("not enough memory to create node");
+            k_free(node_ptr);
             result = NO_MEM_HEAP;
             break;
         case -ENOSPC:
             LOG_ERR("too many nodes already, cannot create node");
+            k_free(node_ptr);
             result = NO_FREE_NODE;
             break;
         default:
             LOG_ERR("unexpected result from sys_hashmap_insert");
+            k_free(node_ptr);
             result = UNKNOWN_ERR;
             break;
         }
@@ -234,7 +237,6 @@ int dect_mac_node_delete_node(uint32_t address)
 {
 
     struct node *node_ptr;
-
     int result;
 
     k_mutex_lock(&node_mutex, K_FOREVER);
