@@ -3,8 +3,6 @@
 !theme cerulean_modified from ./theme
 
 
-skinparam actorStyle awesome
-
 :**USER**: as user
 
 usecase put as "put function"
