@@ -1,0 +1,20 @@
+@startuml mac_harq_request
+
+!theme cerulean_modified from ./theme
+
+start
+
+:init HARQ process;
+:substract buffer size;
+if (buffer size) then (big enough)
+    :create "normal\nacknowledgement"\nfeedback\n//(feedback format 1)//;
+else (too small)
+    :log error;
+    :create "packet too\nbig for buffer size"\nfeedback\n//(feedback format 6)//;
+endif
+:send to PHY layer\n//(bypassing the queue)//;
+:put a placeholder in the\nPHY handler queue;
+stop
+
+
+@enduml
