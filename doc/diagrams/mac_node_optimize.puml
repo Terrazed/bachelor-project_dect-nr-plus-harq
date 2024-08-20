@@ -1,4 +1,4 @@
-@startuml mac_queue_optimize
+@startuml mac_node_optimize
 
 !theme cerulean_modified from ./theme
 
