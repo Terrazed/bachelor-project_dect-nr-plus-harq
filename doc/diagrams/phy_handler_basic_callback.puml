@@ -1,0 +1,23 @@
+@startuml phy_handler_basic_callback
+
+!theme cerulean_modified from ./theme
+
+skinparam defaultTextAlignment center
+
+start
+:Save the modem time;
+if (error ?) then (yes)
+    -[dashed]->
+    :Log the error;
+    -[dashed]->
+else (no)
+    :Do something
+    related to
+    the operation;
+
+    :Notify the queue that
+    the PHY is ready;
+endif
+stop
+
+@enduml

@@ -1,0 +1,38 @@
+@startuml phy_handler_cb_op_complete
+
+!theme cerulean_modified from ./theme
+
+start
+:Save time;
+if (Error ?) then (no)
+    if (current operation ?) then (tx from tx_rx)
+        :Switch from TX to RX;
+        if (has requested HARQ ?) then (yes)
+            :Start HARQ
+            retransmission timer;
+        else (no)
+        -[dashed]->
+        endif
+    else (other)
+        if (operation origin ?) then (from queue)
+            :notify queue 
+            of operation
+            completion;
+        else (other)
+        -[dashed]->
+        endif
+    endif
+else (yes)
+    if (Error type ?) then (Invalid\nstart time)
+        :Retry operation;
+    elseif(Error type ?) then (!Combined op\nfailed)
+        :Log error;
+    else
+    -[dashed]->
+    endif
+endif
+
+stop
+
+
+@enduml

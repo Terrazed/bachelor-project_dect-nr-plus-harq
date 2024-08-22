@@ -1,0 +1,67 @@
+@startuml phy_handler_use_case
+
+!theme cerulean_modified from ./theme
+
+
+skinparam actorStyle awesome
+
+:**USER**: as user
+
+package MAC {
+    usecase harq as "**HARQ**"
+
+    usecase queue as "**QUEUE**"
+
+'    The user can push operation in the 
+'    queue that will be scheduled and 
+'    executed by the handler
+'
+'    This is (mostly) the entry point for
+'    the users"
+
+
+    usecase handler as "**HANDLER**"
+
+'    The handler is an interface that
+'    simplify the usage of the PHY layer
+'
+'    This is the entry point of the PHY API"
+
+    usecase callback as "**CALLBACKS**"
+
+'    The callback functions are
+'    the exit point of the PHY API"
+
+    usecase node as "**NODE**"
+}
+
+usecase phy as "**PHY**
+**API**"
+
+'This is the PHY API"
+
+usecase modem as "**MODEM**
+**CORE**"
+
+'This is where all the 
+'RF stuff is done"
+
+
+
+
+user ---> queue : schedule\nPHY operation
+user --> harq : schedule\nHARQ operation
+harq --> queue : schedule\nPHY operation
+queue --> handler : give operation\nto handler
+handler --> phy : execute\noperation
+phy --> modem : execute\noperation
+modem --> phy#line:aquamarine;text:darkcyan : result
+phy ---> callback#line:aquamarine;text:darkcyan : result
+callback --> user#line:aquamarine;text:darkcyan : send result\nto user
+callback --> harq#line:aquamarine;text:darkcyan : send result\nto harq
+node <--> handler : get power\nand mcs
+callback ---> node : optimize\nnode
+
+
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml phy_handler_queue_exec
+
+!theme cerulean_modified from ./theme
+
+start
+:get item from priority\nmessage queue;
+repeat
+    :send operation to\nPHY layer through\nPHY handler;
+    if(schedule result ?) then (success)
+        :reset counter\nif needed;
+        stop
+    else (fail)
+        :increment\nretry counter;
+    endif
+    backward:wait the\ndefined\ndelay;
+repeat while (retry counter ?) is (less than\nmax retries)
+->max number of\nretries reached;
+:notify error;
+:give back\nsemaphore;
+stop
+@enduml

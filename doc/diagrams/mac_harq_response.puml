@@ -1,0 +1,25 @@
+@startuml mac_harq_response
+
+!theme cerulean_modified from ./theme
+
+start
+:get feedback from message;
+:get HARQ process;
+if (feedback format) then (format 1)
+    if(acknowledgement) then (ACK)
+        :stop the \nretransmission\nwork;
+        :free the\nHARQ process;
+    else (NACK)
+        :log negative\nacknowledgement;
+        :increment\nredundancy version;
+        :retransmit\nthe packet now;
+    endif
+else (format 6 (implicit NACK))
+    :log negative\nacknowledgement;
+    :reset redundancy\nversion;
+    :retransmit the\npacket now;
+endif
+stop
+
+
+@enduml

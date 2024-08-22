@@ -1,0 +1,34 @@
+@startuml phy_handler_queue_put
+
+!theme cerulean_modified from ./theme
+
+
+:**USER**: as user
+
+usecase put as "put function"
+queue "\nput message queue\n" as put_msgq
+rectangle "put thread" as put_thread
+queue "\n\n    MAIN LIST    \n\n" as list
+rectangle {
+circle "List semaphore" as list_sem
+}
+
+note right of put_msgq
+    This is decoupling the
+    main list so that it
+    can be called from an
+    ISR while still having
+    the main list
+    pretected by a mutex
+end note
+
+user --> put
+put --> put_msgq: sends to message queue
+put_msgq ..> put_thread: new operation to put in the list
+put_thread --> list: add operation according to priority
+put_thread --> list_sem: new operation
+
+
+
+
+@enduml

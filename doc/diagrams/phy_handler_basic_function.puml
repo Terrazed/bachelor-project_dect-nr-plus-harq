@@ -1,0 +1,20 @@
+@startuml phy_handler_basic_function
+
+!theme cerulean_modified from ./theme
+
+skinparam defaultTextAlignment center
+
+start
+:create the PHY API
+parameters from the handler
+function parameters;
+:indicating current state;
+:send to PHY API;
+if (function result ?) then (success)
+    -[dashed]->
+else (error)
+    :logging error;
+endif
+stop
+
+@enduml

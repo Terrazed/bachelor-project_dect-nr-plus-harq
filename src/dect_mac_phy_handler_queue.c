@@ -17,12 +17,11 @@ K_MEM_SLAB_DEFINE(dect_mac_phy_handler_queue_node_slab, sizeof(struct dect_mac_p
 sys_slist_t dect_mac_phy_handler_queue = SYS_SLIST_STATIC_INIT(&dect_mac_phy_handler_queue);
 struct dect_mac_phy_handler_queue_node current_node = {0};
 uint32_t dect_mac_phy_handler_queue_operation_failed_counter = 0;
-struct k_work_q dect_mac_phy_handler_queue_work_queue;
 
 int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_handler_params *params, uint32_t priority)
 {
 
-    /* create the work */
+    /* create the item */
     struct dect_mac_phy_handler_queue_item *dect_mac_phy_handler_queue_item = NULL;
     int ret = k_mem_slab_alloc(&dect_mac_phy_handler_queue_item_slab, &dect_mac_phy_handler_queue_item, K_NO_WAIT);
     if (ret)
@@ -31,7 +30,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
         return NO_MEM_SLAB;
     }
 
-    /* create the work context */
+    /* create the item context */
     dect_mac_phy_handler_queue_item->function = function;
     if (params != NULL)
     {
@@ -56,7 +55,7 @@ int dect_phy_queue_put(enum dect_mac_phy_function function, union dect_mac_phy_h
     return OK;
 }
 
-void dect_mac_phy_handler_queue_put_thread(struct k_work *work)
+void dect_mac_phy_handler_queue_put_thread()
 {
     while (1)
     {
